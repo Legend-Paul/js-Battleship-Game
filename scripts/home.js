@@ -42,7 +42,7 @@ function addColorToNextDot() {
 }
 
 async function loadDots() {
-    let childrenNumber = dotsCont.childElementCount * 300;
+    let childrenNumber = dotsCont.childElementCount * 3;
     let count = 0;
 
     while (count <= childrenNumber) {
