@@ -15,6 +15,7 @@
     --red: #ff4136;
     --gold: #ffd700;
     --orange: #ff851b;
+    --moderate-green: #4caf50;
 }
 @property --angle {
     syntax: "<angle>";
@@ -132,7 +133,24 @@ main {
                 gap: 0.25rem;
                 input {
                     height: 1.5rem;
-                    padding: 0.5rem;
+                    padding: 0 0.5rem;
+                    outline: 2px solid var(--slate-grey);
+                    border: none;
+                    border-radius: 0.25rem;
+                    height: 2rem;
+                    &:focus,
+                    &:invalid:focus,
+                    &:valid:focus {
+                        outline-color: var(--teal-blue);
+                    }
+
+                    &:user-invalid {
+                        outline-color: var(--red);
+                    }
+
+                    &:user-valid {
+                        outline-color: var(--moderate-green);
+                    }
                 }
             }
             .second-player-label {
@@ -140,7 +158,11 @@ main {
             }
         }
         button {
-            padding: 0.25rem 0.75rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--moderate-green);
+            border: none;
+            color: var(--white);
+            border-radius: 0.5rem;
             cursor: pointer;
         }
     }
