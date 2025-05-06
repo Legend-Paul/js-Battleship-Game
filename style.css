@@ -73,39 +73,38 @@ main {
         }
     }
 }
-
-dialog {
+.dialog-cont {
     z-index: 20;
-    position: relative;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    padding: 1rem;
-    border: none;
-    background-color: var(--white);
-    z-index: 1;
-    overflow: hidden;
+    dialog {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        padding: 1rem;
+        border: none;
+        background-color: var(--white);
 
-    .input-name-cont {
-        .name-field {
-            margin: 1rem 0;
-            display: flex;
-            gap: 2rem;
-            label {
-                display: grid;
-                gap: 0.25rem;
-                input {
-                    height: 1.5rem;
-                    padding: 0.5rem;
+        .input-name-cont {
+            .name-field {
+                margin: 1rem 0;
+                display: flex;
+                gap: 2rem;
+                label {
+                    display: grid;
+                    gap: 0.25rem;
+                    input {
+                        height: 1.5rem;
+                        padding: 0.5rem;
+                    }
+                }
+                .second-player-label {
+                    display: none;
                 }
             }
-            .second-player-label {
-                display: none;
+            button {
+                padding: 0.25rem 0.75rem;
+                cursor: pointer;
             }
-        }
-        button {
-            padding: 0.25rem 0.75rem;
-            cursor: pointer;
         }
     }
 }
