@@ -1,7 +1,5 @@
 let dotsCont = document.querySelector(".dots-cont");
-let dialog = document.querySelector("dialog");
-let dialogCont = document.querySelector(".dialog-cont");
-
+let dialog = document.querySelector(".dialog");
 let counter = 0;
 
 function displayCurrentDot(time) {

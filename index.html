@@ -20,36 +20,35 @@
                     </div>
                 </div>
             </div>
-            <div class="dialog-cont">
-                <dialog>
-                    <div class="input-name-cont">
-                        <select name="play-option" class="play-option">
-                            <option value="computer" selected>Computer</option>
-                            <option value="2-players">2 Players</option>
-                        </select>
-                        <div class="name-field">
-                            <label class="first-player-label">
-                                <p>Player name:</p>
-                                <input
-                                    type="text"
-                                    class="first-player-name"
-                                    required
-                                />
-                            </label>
-                            <label class="second-player-label">
-                                <p>Second player name:</p>
 
-                                <input
-                                    type="text"
-                                    class="second-player-name"
-                                    required
-                                />
-                            </label>
-                        </div>
-                        <button type="submit">Start Game</button>
+            <dialog class="dialog">
+                <div class="name-input-cont">
+                    <select name="play-option" class="play-option">
+                        <option value="computer" selected>Computer</option>
+                        <option value="2-players">2 Players</option>
+                    </select>
+                    <div class="name-field">
+                        <label class="first-player-label">
+                            <p>Player name:</p>
+                            <input
+                                type="text"
+                                class="first-player-name"
+                                required
+                            />
+                        </label>
+                        <label class="second-player-label">
+                            <p>Second player name:</p>
+
+                            <input
+                                type="text"
+                                class="second-player-name"
+                                required
+                            />
+                        </label>
                     </div>
-                </dialog>
-            </div>
+                    <button type="submit">Start Game</button>
+                </div>
+            </dialog>
         </main>
         <script src="main.js" type="module"></script>
     </body>
