@@ -23,16 +23,20 @@
 
             <dialog class="dialog">
                 <div class="name-input-cont">
-                    <select name="play-option" class="play-option">
-                        <option value="computer" selected>Computer</option>
-                        <option value="2-players">2 Players</option>
+                    <select name="game-play-option" class="game-play-option">
+                        <option value="" disabled selected>
+                            Select play option
+                        </option>
+                        <option value="AI">AI</option>
+                        <option value="2 players">2 Players</option>
                     </select>
+                    <p class="error-msg"></p>
                     <div class="name-field">
                         <label class="first-player-label">
                             <p>Player name:</p>
                             <input
                                 type="text"
-                                class="first-player-name"
+                                class="players-name first-player-name"
                                 required
                             />
                         </label>
@@ -41,12 +45,14 @@
 
                             <input
                                 type="text"
-                                class="second-player-name"
+                                class="players-name second-player-name"
                                 required
                             />
                         </label>
                     </div>
-                    <button type="submit">Start Game</button>
+                    <button type="submit" class="start-game-btn">
+                        Start Game
+                    </button>
                 </div>
             </dialog>
         </main>
