@@ -1,4 +1,7 @@
 let dotsCont = document.querySelector(".dots-cont");
+let dialog = document.querySelector("dialog");
+let dialogCont = document.querySelector(".dialog-cont");
+
 let counter = 0;
 
 function displayCurrentDot(time) {
@@ -53,5 +56,10 @@ async function loadDots() {
         count++;
     }
 }
+
+let showDialog = () => {
+    dialog.showModal();
+};
+setTimeout(showDialog, 6000);
 
 export { loadDots };

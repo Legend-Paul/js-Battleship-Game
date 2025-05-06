@@ -1,5 +1,10 @@
+const { Ship } = require("./createShips.js");
+
 class Gameboard {
-    placeShip(shipPos, shipLength, orientation, boardPos) {
+    constructor() {
+        this.ships = [];
+    }
+    checkShipPlacement(shipPos, shipLength, orientation, boardPos) {
         let shipLeft = shipPos.x;
         let shipTop = shipPos.y;
         let shipRight = shipPos.x + shipPos.width;
