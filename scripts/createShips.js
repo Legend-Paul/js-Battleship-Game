@@ -5,13 +5,13 @@ class Ship {
         this.sunk = false;
     }
     isHit() {
-        this.hit++;
+        return this.hit++;
     }
     isSunk() {
         if (this.hit >= this.length) {
             this.sunk = true;
         }
+        return this.sunk;
     }
 }
-
-export { Ship };
+module.exports = { Ship };
