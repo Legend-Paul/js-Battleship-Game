@@ -67,6 +67,7 @@ async function loadDots() {
         count++;
     }
 }
+loadDots();
 
 let showDialog = () => {
     dialog.showModal();
