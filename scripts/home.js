@@ -1,3 +1,5 @@
+const { addPlayers } = require("../utils/addPlayers");
+
 let dotsCont = document.querySelector(".dots-cont");
 let dialog = document.querySelector(".dialog");
 let startGameBtn = document.querySelector(".start-game-btn");
@@ -10,7 +12,6 @@ let errorMsg = document.querySelector(".error-msg");
 
 let counter = 0;
 let playOption = null;
-let players = {};
 let twoPlayers = false;
 
 function displayCurrentDot(time) {
@@ -100,26 +101,19 @@ function startGame() {
                     "Select play option or provide player name";
             }
         } else {
-            addPlayers(firstPlayer, secondPlayer);
+            let player1 = firstPlayer.value;
+            let player2 = "AI";
+            if (twoPlayers) {
+                player2 = secondPlayer.value;
+            }
+            let players = addPlayers(player1, player2);
+            if (!Object.keys(players).length) {
+                errorMsg.innerHTML = "Enter different names";
+            }
         }
     });
 }
-function addPlayers(firstPlayer, secondPlayer) {
-    let player1 = firstPlayer.value.toLowerCase();
-    let player2 = null;
-    if (playOption == "2 players") {
-        player2 = secondPlayer.value;
-    } else {
-        player2 = "AI";
-    }
 
-    if (player1.toLowerCase() !== player2.toLowerCase()) {
-        players.player1 = player1;
-        players.player2 = player2;
-        return players;
-    }
-    errorMsg.innerHTML = "Enter different names";
-}
 function removeRedOutline() {
     playersName.forEach((player) => {
         player.addEventListener("focus", () => {
@@ -130,4 +124,4 @@ function removeRedOutline() {
 removeRedOutline();
 startGame();
 
-export { loadDots };
+module.exports = { loadDots };
