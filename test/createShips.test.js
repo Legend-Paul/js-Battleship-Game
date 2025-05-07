@@ -1,4 +1,4 @@
-const { Ship } = require("./createShips.js");
+const { Ship } = require("../scripts/createShips.js");
 let ship = new Ship(3);
 
 test("Is ship hit", () => {
