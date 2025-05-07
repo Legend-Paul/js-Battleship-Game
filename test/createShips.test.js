@@ -9,11 +9,16 @@ test("Is ship hit", () => {
 
 test("Is ship not sunk", () => {
     ship.isHit();
+    console.log(ship.isSunk());
+
     expect(ship.isSunk()).toBe(false);
 });
 
 test("Is ship sunk", () => {
     ship.isHit();
     ship.isHit();
+    ship.isHit();
+    ship.isHit();
+    console.log(ship.isSunk());
     expect(ship.isSunk()).toBe(true);
 });
