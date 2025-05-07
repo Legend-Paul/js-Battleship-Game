@@ -1,5 +1,4 @@
-const { Ship } = require("./createShips.js");
-
+import { Ship } from "./createShips.js";
 class Gameboard {
     constructor() {
         this.ships = [];
@@ -31,4 +30,4 @@ class Gameboard {
     }
 }
 
-module.exports = { Gameboard };
+export { Gameboard };

@@ -14,4 +14,4 @@ class Ship {
         return this.sunk;
     }
 }
-module.exports = { Ship };
+export { Ship };

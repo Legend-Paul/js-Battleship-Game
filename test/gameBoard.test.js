@@ -1,4 +1,4 @@
-const { Gameboard } = require("../scripts/gameboard.js");
+import { Gameboard } from "../scripts/gameboard.js";
 
 describe("left limit", () => {
     test("ship over grid left limit", () => {

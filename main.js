@@ -1,2 +1,2 @@
-const { loadDots } = require("./scripts/home.js");
+import { loadDots } from "./scripts/home.js";
 loadDots();

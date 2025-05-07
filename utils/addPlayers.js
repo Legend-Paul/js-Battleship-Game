@@ -10,4 +10,4 @@ function addPlayers(firstPlayer, secondPlayer) {
     return players;
 }
 
-module.exports = { addPlayers };
+export { addPlayers };

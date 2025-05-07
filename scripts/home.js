@@ -1,4 +1,4 @@
-const { addPlayers } = require("../utils/addPlayers");
+import { addPlayers } from "../utils/addPlayers.js";
 
 let dotsCont = document.querySelector(".dots-cont");
 let dialog = document.querySelector(".dialog");
@@ -124,4 +124,4 @@ function removeRedOutline() {
 removeRedOutline();
 startGame();
 
-module.exports = { loadDots };
+export { loadDots };

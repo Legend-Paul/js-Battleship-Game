@@ -1,4 +1,4 @@
-const { addPlayers } = require("../utils/addPlayers");
+import { addPlayers } from "../utils/addPlayers.js";
 
 describe("addPlayers function", () => {
     test("Adds 2 players with diffrent name", () => {
