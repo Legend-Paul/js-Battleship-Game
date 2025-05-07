@@ -9,6 +9,7 @@ let secondPlayerLabel = document.querySelector(".second-player-label");
 let secondPlayer = document.querySelector(".second-player-name");
 let playersName = document.querySelectorAll(".players-name");
 let errorMsg = document.querySelector(".error-msg");
+let gameboardPage = document.querySelector(".gameboard-page");
 
 let counter = 0;
 let playOption = null;
@@ -69,6 +70,8 @@ async function loadDots() {
 
 let showDialog = () => {
     dialog.showModal();
+    firstPlayer.value = "";
+    firstPlayer.focus();
 };
 setTimeout(showDialog, 6000);
 
@@ -109,6 +112,8 @@ function startGame() {
             let players = addPlayers(player1, player2);
             if (!Object.keys(players).length) {
                 errorMsg.innerHTML = "Enter different names";
+            } else {
+                gameboardPage.href = "pages/gameboard.html";
             }
         }
     });
