@@ -1,8 +1,3 @@
-@property --angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-}
 body {
     overflow: hidden;
     color: var(--soft-black);
@@ -61,100 +56,6 @@ main {
         }
     }
 }
-.dialog {
-    width: 30rem;
-    height: 12rem;
-    position: relative;
-    overflow: visible;
-    border: none;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    .error-msg {
-        color: var(--red);
-        margin-top: 0.5rem;
-    }
-    .name-input-cont {
-        width: 100%;
-        height: 100%;
-        background-color: var(--blue);
-        padding: 1rem;
-        position: absolute;
-        top: 0;
-        left: 0;
-        border-radius: 0.25rem;
-        &::after,
-        &::before {
-            content: "";
-            position: absolute;
-            border-radius: 0.5rem;
-            width: 100%;
-            height: 100%;
-            top: 50%;
-            left: 50%;
-            translate: -50% -50%;
-            background-image: conic-gradient(
-                from var(--angle),
-                var(--red),
-                var(--gold),
-                var(--teal-blue),
-                var(--red)
-            );
-
-            z-index: -1;
-            padding: 0.25rem;
-            animation: spinningBorder 5s linear infinite;
-        }
-        &::before {
-            filter: blur(1.5rem);
-            opacity: 0.25;
-        }
-
-        .name-field {
-            margin: 1rem 0;
-            display: flex;
-            gap: 2rem;
-            label {
-                display: grid;
-                gap: 0.5rem;
-                input {
-                    height: 1.5rem;
-                    padding: 0 0.5rem;
-                    outline: 2px solid var(--slate-grey);
-                    border: none;
-                    border-radius: 0.25rem;
-                    height: 2rem;
-                    &:focus,
-                    &:invalid:focus,
-                    &:valid:focus {
-                        outline-color: var(--teal-blue);
-                    }
-
-                    &:user-invalid {
-                        outline-color: var(--red);
-                    }
-
-                    &:user-valid,
-                    &:valid {
-                        outline-color: var(--moderate-green);
-                    }
-                }
-            }
-            .second-player-label {
-                display: none;
-            }
-        }
-        .start-game-btn {
-            padding: 0.5rem 1rem;
-            margin-top: 0rem;
-            background-color: var(--moderate-green);
-            border: none;
-            color: var(--white);
-            border-radius: 0.5rem;
-            cursor: pointer;
-        }
-    }
-}
 
 @keyframes imageOnLoad {
     0% {
@@ -181,14 +82,5 @@ main {
     }
     100% {
         transform: translateY(0);
-    }
-}
-
-@keyframes spinningBorder {
-    0% {
-        --angle: 0deg;
-    }
-    100% {
-        --angle: 360deg;
     }
 }

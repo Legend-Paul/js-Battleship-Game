@@ -1,6 +1,18 @@
 import { Gameboard } from "./gameboard.js";
 import { Ship } from "./createShips.js";
+import { addPlayers } from "../utils/addPlayers.js";
 
+let dialog = document.querySelector(".dialog");
+let startGameBtn = document.querySelector(".start-game-btn");
+let gamePlayOption = document.querySelector(".game-play-option");
+let firstPlayer = document.querySelector(".first-player-name");
+let secondPlayerLabel = document.querySelector(".second-player-label");
+let secondPlayer = document.querySelector(".second-player-name");
+let playersName = document.querySelectorAll(".players-name");
+let errorMsg = document.querySelector(".error-msg");
+let players = null;
+let playOption = null;
+let twoPlayers = false;
 const userGameboard = document.querySelector(".gameboard");
 let errrorMsg = document.querySelector(".error");
 const cellSize = 40;
@@ -198,3 +210,63 @@ function updateOccupiedCells(ship, newKeys) {
     newKeys.forEach((key) => occupiedCells.add(key));
     ship.dataset.occupied = JSON.stringify(newKeys);
 }
+
+// Dialog
+
+let showDialog = () => {
+    dialog.showModal();
+    firstPlayer.value = "";
+    firstPlayer.focus();
+};
+showDialog();
+
+function getPlayers() {
+    gamePlayOption.addEventListener("change", (e) => {
+        let firstPlayerTitle = document.querySelector(".first-player-label p");
+        playOption = gamePlayOption.value;
+        errorMsg.innerHTML = "";
+        if (playOption === "2 players") {
+            secondPlayerLabel.style.display = "grid";
+            firstPlayerTitle.innerHTML = "First player name:";
+            twoPlayers = true;
+        } else {
+            secondPlayerLabel.style.display = "none";
+            firstPlayerTitle.innerHTML = "Player name:";
+            twoPlayers = false;
+        }
+    });
+}
+getPlayers();
+function startGame() {
+    startGameBtn.addEventListener("click", (e) => {
+        if (!firstPlayer.value || (twoPlayers && !secondPlayer.value)) {
+            if (playOption === "2 players") {
+                errorMsg.innerHTML = "Provide all players name";
+            } else {
+                errorMsg.innerHTML = "Provide player name";
+            }
+        } else {
+            let player1 = firstPlayer.value;
+            let player2 = "AI";
+            if (twoPlayers) {
+                player2 = secondPlayer.value;
+            }
+            players = addPlayers(player1, player2);
+            if (!Object.keys(players).length) {
+                errorMsg.innerHTML = "Enter different names";
+            } else {
+                dialog.close();
+            }
+        }
+    });
+}
+
+function removeRedOutline() {
+    playersName.forEach((player) => {
+        player.addEventListener("focus", () => {
+            errorMsg.innerHTML = "";
+        });
+    });
+}
+removeRedOutline();
+startGame();
