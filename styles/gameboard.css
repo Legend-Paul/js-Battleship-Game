@@ -1,28 +1,44 @@
 body {
     margin: 20px;
     font-family: sans-serif;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.gameboard {
+    width: 464px;
+    height: 100vh;
+    background-color: var(--light-grey);
+    padding-left: 2rem;
+    padding-top: 1rem;
 }
 #main-grid {
     display: grid;
-    grid-template-columns: repeat(10, 50px);
-    grid-template-rows: repeat(10, 50px);
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
     position: relative;
-    width: 500px;
-    height: 500px;
+    width: 400px;
     border: 2px solid #333;
     margin-bottom: 20px;
 }
 .cell {
     box-sizing: border-box;
     border: 1px solid #aaa;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
 }
 .ship {
-    height: 50px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: absolute;
     background-color: rgba(0, 150, 255, 0.5);
     cursor: grab;
     user-select: none;
     border: 2px solid #004080;
+    p {
+        opacity: 0.5;
+    }
 }

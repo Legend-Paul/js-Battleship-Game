@@ -1,5 +1,5 @@
 let userGameboard = document.querySelector(".gameboard");
-const cellSize = 50;
+const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
 const occupiedCells = new Set();
@@ -31,9 +31,30 @@ function createShips(sizes) {
         ship.dataset.size = size;
         ship.dataset.id = `ship-${index}`;
         ship.style.width = `${cellSize * size}px`;
-        ship.style.top = `${550 + index * 60}px`;
-        ship.style.left = `20px`;
+        ship.style.top = `${480 + index * 50}px`;
+        ship.style.left = `50% -200px`;
         userGameboard.appendChild(ship);
+        ship.innerHTML = `<p>Yamato</>`;
+        if (size === 4) {
+            ship.style.top = `${480 + 0 * 50}px`;
+            ship.style.left = `calc(50% + 40px)`;
+            ship.innerHTML = `<p>Bismarck</p>`;
+        }
+        if (size === 3) {
+            ship.style.top = `${490 + 1 * 40}px`;
+            ship.innerHTML = `<p>Musashi</p>`;
+        }
+        if (size === 2) {
+            ship.style.top = `${490 + 1 * 40}px`;
+            ship.style.left = `calc(50% - 40px)`;
+            ship.innerHTML = `<p>Iowa-class</p>`;
+        }
+        if (size === 1) {
+            ship.style.top = `${490 + 1 * 40}px`;
+            ship.style.left = `calc(50% + 80px)`;
+            ship.innerHTML = `<p>HMS</p>`;
+        }
+
         return ship;
     });
 }
