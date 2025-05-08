@@ -1,112 +1,150 @@
-import { Ship } from "./createShips.js";
+let userGameboard = document.querySelector(".gameboard");
+const cellSize = 50;
+const gridSize = 10;
+const shipSizes = [5, 4, 3, 2, 1];
+const occupiedCells = new Set();
 
-let grid = document.querySelector(".grid");
-let shipsArray = document.querySelectorAll(".ship");
-let currentShip = null;
-let offsetX = 0;
-let offsetY = 0;
-let drag = false;
-let placedShips = [];
+// Entry point
+window.addEventListener("DOMContentLoaded", () => {
+    const board = document.getElementById("main-grid");
+    createGrid(board);
+    const ships = createShips(shipSizes);
+    enableDragAndDrop(ships, board);
+});
 
-function createGridCells() {
-    for (let i = 0; i < 10; i++) {
-        for (let j = 0; j < 10; j++) {
-            let cell = document.createElement("div");
-            cell.classList.add("cell");
-            grid.appendChild(cell);
+function createGrid(board) {
+    for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            board.appendChild(cell);
         }
     }
 }
-createGridCells();
 
-function createShips() {
-    shipsArray.forEach((ship) => {
-        let cells = parseInt(ship.classList[1]);
-        for (let i = 0; i < cells; i++) {
-            let shipCell = document.createElement("div");
-            shipCell.classList.add("ship-cell");
-            ship.appendChild(shipCell);
-        }
+function createShips(sizes) {
+    return sizes.map((size, index) => {
+        const ship = document.createElement("div");
+        ship.className = "ship";
+        ship.dataset.size = size;
+        ship.dataset.id = `ship-${index}`;
+        ship.style.width = `${cellSize * size}px`;
+        ship.style.top = `${550 + index * 60}px`;
+        ship.style.left = `20px`;
+        userGameboard.appendChild(ship);
+        return ship;
     });
 }
-createShips();
 
-const moveAt = (pageX, pageY) => {
-    if (currentShip) {
-        currentShip.style.left = pageX - offsetX + "px";
-        currentShip.style.top = pageY - offsetY + "px";
-    }
-};
+function enableDragAndDrop(ships, board) {
+    ships.forEach((ship) => {
+        let offsetX = 0,
+            offsetY = 0;
+        let lastValidLeft = ship.style.left;
+        let lastValidTop = ship.style.top;
 
-const onMouseMove = (e) => {
-    if (drag && currentShip) {
-        moveAt(e.pageX, e.pageY);
-    }
-};
+        ship.addEventListener("mousedown", (e) => {
+            offsetX = e.offsetX;
+            offsetY = e.offsetY;
+            ship.style.cursor = "grabbing";
 
-shipsArray.forEach((ship) => {
-    ship.onmousedown = (e) => {
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-        currentShip = ship;
-        drag = true;
+            const onMouseMove = (ev) =>
+                moveShip(ship, ev.clientX - offsetX, ev.clientY - offsetY);
+            const onMouseUp = (ev) => {
+                ship.style.cursor = "grab";
+                document.removeEventListener("mousemove", onMouseMove);
+                document.removeEventListener("mouseup", onMouseUp);
 
-        // Style ship for dragging
-        currentShip.style.position = "absolute";
-        currentShip.style.zIndex = 1000;
-        document.body.appendChild(currentShip);
+                const snapped = snapToGrid(
+                    ev.clientX - offsetX,
+                    ev.clientY - offsetY,
+                    board,
+                    parseInt(ship.dataset.size)
+                );
 
-        moveAt(e.pageX, e.pageY);
-        document.addEventListener("mousemove", onMouseMove);
-    };
-
-    ship.onmouseup = (e) => {
-        document.removeEventListener("mousemove", onMouseMove);
-        drag = false;
-
-        const gridRect = grid.getBoundingClientRect();
-        const cellSize = gridRect.width / 10;
-        const relativeX = e.pageX - gridRect.left;
-        const relativeY = e.pageY - gridRect.top;
-        const col = Math.floor(relativeX / cellSize);
-        const row = Math.floor(relativeY / cellSize);
-        const length = parseInt(currentShip.classList[1]);
-
-        // Check if within grid bounds
-        if (col + length <= 10 && row >= 0 && row < 10 && col >= 0) {
-            // Snap position
-            currentShip.style.left = gridRect.left + col * cellSize + "px";
-            currentShip.style.top = gridRect.top + row * cellSize + "px";
-
-            // Highlight grid cells
-            const cells = grid.querySelectorAll(".cell");
-            for (let i = 0; i < length; i++) {
-                const index = row * 10 + (col + i);
-                const cell = cells[index];
-                if (cell) {
-                    cell.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+                if (!snapped) {
+                    resetShipPosition(ship, lastValidLeft, lastValidTop);
+                    return;
                 }
-            }
 
-            // Record ship position
-            placedShips.push({
-                shipId: currentShip.classList[1],
-                startRow: row,
-                startCol: col,
-                orientation: "horizontal",
-                length: length,
-            });
+                const { row, col, left, top, keys } = snapped;
 
-            // Lock ship
-            ship.onmousedown = null;
-        } else {
-            // Return to original position
-            currentShip.style.left = "";
-            currentShip.style.top = "";
-            currentShip.style.position = "";
-            currentShip.style.zIndex = "";
-        }
+                if (checkOverlap(keys)) {
+                    alert("Invalid move! Overlapping another ship.");
+                    resetShipPosition(ship, lastValidLeft, lastValidTop);
+                    return;
+                }
 
-        currentShip = null;
+                updateOccupiedCells(ship, keys);
+                moveShip(ship, left, top);
+
+                lastValidLeft = `${left}px`;
+                lastValidTop = `${top}px`;
+
+                console.log(`Ship ${ship.dataset.id} placed at:`, keys);
+            };
+
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+        });
+    });
+}
+
+function moveShip(ship, x, y) {
+    ship.style.left = `${x}px`;
+    ship.style.top = `${y}px`;
+}
+
+function resetShipPosition(ship, left, top) {
+    ship.style.left = left;
+    ship.style.top = top;
+}
+
+function snapToGrid(x, y, board, size) {
+    const boardRect = board.getBoundingClientRect();
+    const relX = x - boardRect.left;
+    const relY = y - boardRect.top;
+
+    let col = Math.round(relX / cellSize);
+    let row = Math.round(relY / cellSize);
+
+    col = Math.min(Math.max(col, 0), gridSize - size);
+    row = Math.min(Math.max(row, 0), gridSize - 1);
+
+    if (
+        relX < 0 ||
+        relY < 0 ||
+        col < 0 ||
+        row < 0 ||
+        col + size > gridSize ||
+        row >= gridSize
+    ) {
+        return null;
+    }
+
+    const keys = [];
+    for (let i = 0; i < size; i++) {
+        keys.push(`${row},${col + i}`);
+    }
+
+    return {
+        row,
+        col,
+        left: boardRect.left + col * cellSize,
+        top: boardRect.top + row * cellSize,
+        keys,
     };
-});
+}
+
+function checkOverlap(keys) {
+    return keys.some((key) => occupiedCells.has(key));
+}
+
+function updateOccupiedCells(ship, newKeys) {
+    const oldKeys = JSON.parse(ship.dataset.occupied || "[]");
+    oldKeys.forEach((key) => occupiedCells.delete(key));
+    newKeys.forEach((key) => occupiedCells.add(key));
+    ship.dataset.occupied = JSON.stringify(newKeys);
+}
