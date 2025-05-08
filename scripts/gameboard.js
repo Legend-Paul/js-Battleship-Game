@@ -5,7 +5,7 @@ export class Gameboard {
         this.size = size;
         this.ships = [];
         this.attacks = new Set(); // All attack attempts
-        this.hits = new Set(); // Successful hits
+        this.isHits = new Set(); // Successful isHits
         this.misses = new Set(); // Missed shots
         this.occupied = new Set(); // All coordinates occupied by ships
     }
@@ -45,14 +45,14 @@ export class Gameboard {
         this.attacks.add(key);
 
         for (const ship of this.ships) {
-            if (ship.hit(key)) {
-                this.hits.add(key);
-                return { valid: true, hit: true, sunk: ship.isSunk() };
+            if (ship.isHit(key)) {
+                this.isHits.add(key);
+                return { valid: true, isHit: true, sunk: ship.isSunk() };
             }
         }
 
         this.misses.add(key);
-        return { valid: true, hit: false };
+        return { valid: true, isHit: false };
     }
 
     allShipsSunk() {

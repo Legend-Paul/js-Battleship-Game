@@ -1,110 +1,66 @@
 import { Gameboard } from "../scripts/gameboard.js";
 
-describe("left limit", () => {
-    test("ship over grid left limit", () => {
-        let shipPos = { x: 10, y: 15, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(false);
-    });
-    test("ship within grid left limit", () => {
-        let shipPos = { x: 20, y: 15, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(true);
-    });
+let gameboard;
+
+beforeEach(() => {
+    gameboard = new Gameboard(10);
 });
 
-describe("top limit", () => {
-    test("ship above grid top limit", () => {
-        let shipPos = { x: 20, y: 10, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(false);
+describe("Gameboard class", () => {
+    test("placeShip places a ship successfully", () => {
+        const result = gameboard.placeShip(0, 0, 3, true);
+        expect(result).toBe(true);
+        expect(gameboard.ships.length).toBe(1);
+        expect(gameboard.occupied.has("0,0")).toBe(true);
+        expect(gameboard.occupied.has("0,1")).toBe(true);
+        expect(gameboard.occupied.has("0,2")).toBe(true);
     });
-    test("ship within grid top limit", () => {
-        let shipPos = { x: 20, y: 150, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(true);
-    });
-});
 
-describe("right limit", () => {
-    test("Horizontal ship over grid right limit", () => {
-        let shipPos = { x: 250, y: 150, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(false);
+    test("placeShip fails if the ship is out of bounds", () => {
+        const result = gameboard.placeShip(0, 8, 3, true);
+        expect(result).toBe(false);
+        expect(gameboard.ships.length).toBe(0);
     });
-    test("Horizontal ship within grid right limit", () => {
-        let shipPos = { x: 20, y: 15, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(true);
-    });
-    test("Vertical ship over grid right limit", () => {
-        let shipPos = { x: 390, y: 10, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
 
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "vertical", boardPos)
-        ).toEqual(false);
+    test("placeShip fails if the ship overlaps with another ship", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        const result = gameboard.placeShip(0, 1, 3, true);
+        expect(result).toBe(false);
+        expect(gameboard.ships.length).toBe(1);
     });
-    test("Vertical ship within grid right limit", () => {
-        let shipPos = { x: 250, y: 20, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "vertical", boardPos)
-        ).toBe(true);
-    });
-});
 
-describe("bottom limit", () => {
-    test("Horizontal ship below grid bottom limit", () => {
-        let shipPos = { x: 30, y: 390, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(false);
+    test("receiveAttack hits a ship", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        const result = gameboard.receiveAttack(0, 1);
+        expect(result).toEqual({ valid: true, isHit: true, sunk: false });
+        expect(gameboard.isHits.has("0,1")).toBe(true);
     });
-    test("Horizontal ship within grid bottom limit", () => {
-        let shipPos = { x: 20, y: 15, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "horizontal", boardPos)
-        ).toBe(true);
+
+    test("receiveAttack misses when no ship is present", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        const result = gameboard.receiveAttack(5, 5);
+        expect(result).toEqual({ valid: true, isHit: false });
+        expect(gameboard.misses.has("5,5")).toBe(true);
     });
-    test("Vertical ship below grid bottom limit", () => {
-        let shipPos = { x: 20, y: 250, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "vertical", boardPos)
-        ).toBe(false);
+
+    test("receiveAttack fails if the position was already attacked", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        gameboard.receiveAttack(0, 1);
+        const result = gameboard.receiveAttack(0, 1);
+        expect(result).toEqual({ valid: false, alreadyAttacked: true });
     });
-    test("Vertical ship within grid bottom limit", () => {
-        let shipPos = { x: 20, y: 15, width: 40, height: 40 };
-        let boardPos = { x: 15, y: 15, width: 400, height: 400 };
-        let gameboard = new Gameboard();
-        expect(
-            gameboard.checkShipPlacement(shipPos, 5, "vertical", boardPos)
-        ).toBe(true);
+
+    test("allShipsSunk returns false if not all ships are sunk", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        gameboard.receiveAttack(0, 0);
+        expect(gameboard.allShipsSunk()).toBe(false);
+    });
+
+    test("allShipsSunk returns true if all ships are sunk", () => {
+        gameboard.placeShip(0, 0, 3, true);
+        gameboard.receiveAttack(0, 0);
+        gameboard.receiveAttack(0, 1);
+        gameboard.receiveAttack(0, 2);
+        expect(gameboard.allShipsSunk()).toBe(true);
     });
 });

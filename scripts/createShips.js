@@ -9,7 +9,7 @@ export class Ship {
         this.positions = positions;
     }
 
-    hit(position) {
+    isHit(position) {
         if (this.positions.includes(position)) {
             this.hits++;
             return true;
