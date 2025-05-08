@@ -13,8 +13,10 @@ let errorMsg = document.querySelector(".error-msg");
 let players = null;
 let playOption = null;
 let twoPlayers = false;
+
 const userGameboard = document.querySelector(".gameboard");
 let errrorMsg = document.querySelector(".error");
+let boardHeading = document.querySelector(".board-heading");
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
@@ -256,6 +258,7 @@ function startGame() {
                 errorMsg.innerHTML = "Enter different names";
             } else {
                 dialog.close();
+                boardHeading.innerHTML = `Hello ${players.player1}! Place Your Ships`;
             }
         }
     });
