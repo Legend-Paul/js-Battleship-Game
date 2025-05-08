@@ -1,8 +1,12 @@
-let userGameboard = document.querySelector(".gameboard");
+import { Gameboard } from "./gameboard.js";
+import { Ship } from "./createShips.js";
+
+const userGameboard = document.querySelector(".gameboard");
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
 const occupiedCells = new Set();
+const playerBoard = new Gameboard(gridSize); // Gameboard logic instance
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -34,25 +38,25 @@ function createShips(sizes) {
         ship.style.top = `${480 + index * 50}px`;
         ship.style.left = `50% -200px`;
         userGameboard.appendChild(ship);
-        ship.innerHTML = `<p>Yamato</>`;
+
+        // Set names
         if (size === 4) {
             ship.style.top = `${480 + 0 * 50}px`;
             ship.style.left = `calc(50% + 40px)`;
             ship.innerHTML = `<p>Bismarck</p>`;
-        }
-        if (size === 3) {
+        } else if (size === 3) {
             ship.style.top = `${490 + 1 * 40}px`;
             ship.innerHTML = `<p>Musashi</p>`;
-        }
-        if (size === 2) {
+        } else if (size === 2) {
             ship.style.top = `${490 + 1 * 40}px`;
             ship.style.left = `calc(50% - 40px)`;
             ship.innerHTML = `<p>Iowa-class</p>`;
-        }
-        if (size === 1) {
+        } else if (size === 1) {
             ship.style.top = `${490 + 1 * 40}px`;
             ship.style.left = `calc(50% + 80px)`;
             ship.innerHTML = `<p>HMS</p>`;
+        } else {
+            ship.innerHTML = `<p>Yamato</p>`;
         }
 
         return ship;
@@ -94,6 +98,18 @@ function enableDragAndDrop(ships, board) {
 
                 if (checkOverlap(keys)) {
                     alert("Invalid move! Overlapping another ship.");
+                    resetShipPosition(ship, lastValidLeft, lastValidTop);
+                    return;
+                }
+
+                const placed = playerBoard.placeShip(
+                    row,
+                    col,
+                    parseInt(ship.dataset.size),
+                    true
+                );
+                if (!placed) {
+                    alert("Invalid placement on Gameboard.");
                     resetShipPosition(ship, lastValidLeft, lastValidTop);
                     return;
                 }

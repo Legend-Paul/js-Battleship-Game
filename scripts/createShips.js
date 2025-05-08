@@ -1,14 +1,23 @@
-class Ship {
+export class Ship {
     constructor(length) {
         this.length = length;
-        this.hit = 0;
+        this.hits = 0;
+        this.positions = []; // Array of cell coordinates (e.g., ["3,2", "3,3", ...])
     }
-    isHit() {
-        return this.hit++;
+
+    place(positions) {
+        this.positions = positions;
     }
+
+    hit(position) {
+        if (this.positions.includes(position)) {
+            this.hits++;
+            return true;
+        }
+        return false;
+    }
+
     isSunk() {
-        return this.hit >= this.length;
+        return this.hits >= this.length;
     }
 }
-
-export { Ship };
