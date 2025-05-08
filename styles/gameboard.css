@@ -42,3 +42,10 @@ body {
         opacity: 0.5;
     }
 }
+.error {
+    position: relative;
+    top: -3rem;
+    left: 0;
+
+    color: var(--red);
+}

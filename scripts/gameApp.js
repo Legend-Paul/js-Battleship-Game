@@ -2,11 +2,15 @@ import { Gameboard } from "./gameboard.js";
 import { Ship } from "./createShips.js";
 
 const userGameboard = document.querySelector(".gameboard");
+let errrorMsg = document.querySelector(".error");
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
+
+let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 const occupiedCells = new Set();
 const playerBoard = new Gameboard(gridSize); // Gameboard logic instance
+let previousShip = null;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -38,7 +42,7 @@ function createShips(sizes) {
         ship.style.top = `${480 + index * 50}px`;
         ship.style.left = `50% -200px`;
         userGameboard.appendChild(ship);
-
+        ship.dataset.shipName = shipNames[index];
         // Set names
         if (size === 4) {
             ship.style.top = `${480 + 0 * 50}px`;
@@ -74,11 +78,19 @@ function enableDragAndDrop(ships, board) {
             offsetX = e.offsetX;
             offsetY = e.offsetY;
             ship.style.cursor = "grabbing";
-
+            errrorMsg.innerHTML = "";
             const onMouseMove = (ev) =>
                 moveShip(ship, ev.clientX - offsetX, ev.clientY - offsetY);
             const onMouseUp = (ev) => {
                 ship.style.cursor = "grab";
+                if (previousShip) {
+                    let shipName = previousShip.dataset.shipName;
+                    let idx = shipNames.indexOf(shipNames);
+                    playerBoard.occupied = new Set(
+                        [...playerBoard.occupied].slice(0, length - idx)
+                    );
+                }
+                console.log();
                 document.removeEventListener("mousemove", onMouseMove);
                 document.removeEventListener("mouseup", onMouseUp);
 
@@ -97,19 +109,19 @@ function enableDragAndDrop(ships, board) {
                 const { row, col, left, top, keys } = snapped;
 
                 if (checkOverlap(keys)) {
-                    alert("Invalid move! Overlapping another ship.");
+                    errrorMsg.innerHTML = "Invalid placement on Gameboard!";
                     resetShipPosition(ship, lastValidLeft, lastValidTop);
                     return;
                 }
-
                 const placed = playerBoard.placeShip(
                     row,
                     col,
                     parseInt(ship.dataset.size),
+
                     true
                 );
                 if (!placed) {
-                    alert("Invalid placement on Gameboard.");
+                    errrorMsg.innerHTML = "Invalid placement on Gameboard!";
                     resetShipPosition(ship, lastValidLeft, lastValidTop);
                     return;
                 }
@@ -120,11 +132,12 @@ function enableDragAndDrop(ships, board) {
                 lastValidLeft = `${left}px`;
                 lastValidTop = `${top}px`;
 
-                console.log(`Ship ${ship.dataset.id} placed at:`, keys);
+                // console.log(`Ship ${ship.dataset.id} placed at:`, keys);
             };
 
             document.addEventListener("mousemove", onMouseMove);
             document.addEventListener("mouseup", onMouseUp);
+            previousShip = e.target;
         });
     });
 }
