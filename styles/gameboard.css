@@ -22,20 +22,27 @@ button {
     cursor: pointer;
 }
 .gameboard {
-    width: 464px;
+    display: flex;
+    gap: 3rem;
     height: 100vh;
     background-color: var(--light-grey);
     padding-left: 2rem;
     padding-top: 1rem;
+    padding-right: 2rem;
 }
-#main-grid {
+#main-grid,
+.enemy-board {
     display: grid;
+    height: 400px;
     grid-template-columns: repeat(10, 40px);
     grid-template-rows: repeat(10, 40px);
     position: relative;
     width: 400px;
     border: 1px solid var(--soft-black);
     margin-bottom: 20px;
+}
+.enemy-board {
+    display: none;
 }
 .cell {
     box-sizing: border-box;

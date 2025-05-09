@@ -18,6 +18,7 @@ const userGameboard = document.querySelector(".gameboard");
 let errrorMsg = document.querySelector(".error");
 let boardHeading = document.querySelector(".board-heading");
 let player2GameboardBtn = document.querySelector(".player2-board-btn");
+let enemyBoard = document.querySelector(".enemy-board");
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
@@ -31,6 +32,7 @@ let previousShip = null;
 window.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("main-grid");
     createGrid(board);
+    createGrid(enemyBoard);
     const ships = createShips(shipSizes);
     enableDragAndDrop(ships, board);
 });
