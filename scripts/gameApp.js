@@ -17,6 +17,7 @@ let twoPlayers = false;
 const userGameboard = document.querySelector(".gameboard");
 let errrorMsg = document.querySelector(".error");
 let boardHeading = document.querySelector(".board-heading");
+let player2GameboardBtn = document.querySelector(".player2-board-btn");
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
@@ -239,30 +240,35 @@ function getPlayers() {
     });
 }
 getPlayers();
+
 function startGame() {
-    startGameBtn.addEventListener("click", (e) => {
-        if (!firstPlayer.value || (twoPlayers && !secondPlayer.value)) {
-            if (playOption === "2 players") {
-                errorMsg.innerHTML = "Provide all players name";
-            } else {
-                errorMsg.innerHTML = "Provide player name";
-            }
+    if (!firstPlayer.value || (twoPlayers && !secondPlayer.value)) {
+        if (playOption === "2 players") {
+            errorMsg.innerHTML = "Provide all players name";
         } else {
-            let player1 = firstPlayer.value;
-            let player2 = "AI";
-            if (twoPlayers) {
-                player2 = secondPlayer.value;
-            }
-            players = addPlayers(player1, player2);
-            if (!Object.keys(players).length) {
-                errorMsg.innerHTML = "Enter different names";
-            } else {
-                dialog.close();
-                boardHeading.innerHTML = `Hello ${players.player1}! Place Your Ships`;
-            }
+            errorMsg.innerHTML = "Provide player name";
         }
-    });
+    } else {
+        let player1 = firstPlayer.value;
+        let player2 = "AI";
+        if (twoPlayers) {
+            player2 = secondPlayer.value;
+        }
+        players = addPlayers(player1, player2);
+        if (!Object.keys(players).length) {
+            errorMsg.innerHTML = "Enter different names";
+        } else {
+            dialog.close();
+            player2GameboardBtn.innerHTML = `${players.player2} board`;
+            boardHeading.innerHTML = `Hello ${players.player1}! Place Your Ships`;
+        }
+    }
 }
+startGameBtn.addEventListener("click", startGame);
+let stratGameByEnterKey = (e) => {
+    if (e.key === "Enter") startGame();
+};
+document.addEventListener("keyup", stratGameByEnterKey);
 
 function removeRedOutline() {
     playersName.forEach((player) => {
@@ -272,4 +278,3 @@ function removeRedOutline() {
     });
 }
 removeRedOutline();
-startGame();
