@@ -21,6 +21,9 @@ button {
     border-radius: 0.5rem;
     cursor: pointer;
 }
+.oponent-board-cont {
+    display: none;
+}
 .gameboard {
     display: flex;
     gap: 3rem;
@@ -154,7 +157,7 @@ button {
                 display: none;
             }
         }
-        .start-game-btn {
+        .done-btn {
             background-color: var(--moderate-green);
         }
     }

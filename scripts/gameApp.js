@@ -3,7 +3,7 @@ import { Ship } from "./createShips.js";
 import { addPlayers } from "../utils/addPlayers.js";
 
 let dialog = document.querySelector(".dialog");
-let startGameBtn = document.querySelector(".start-game-btn");
+let doneBtn = document.querySelector(".done-btn");
 let gamePlayOption = document.querySelector(".game-play-option");
 let firstPlayer = document.querySelector(".first-player-name");
 let secondPlayerLabel = document.querySelector(".second-player-label");
@@ -14,10 +14,15 @@ let players = null;
 let playOption = null;
 let twoPlayers = false;
 
-const userGameboard = document.querySelector(".gameboard");
+const player1Cont = document.querySelector(".player1-board-cont .gameboard");
+const player2Cont = document.querySelector(".player2-board-cont .gameboard");
 let errrorMsg = document.querySelector(".error");
-let boardHeading = document.querySelector(".board-heading");
-let player2GameboardBtn = document.querySelector(".player2-board-btn");
+let boardHeading = document.querySelectorAll(".board-heading");
+const player2BoardCont = document.querySelector(".player2-board-cont");
+const player1BoardCont = document.querySelector(".player1-board-cont");
+let player2BoardBtn = document.querySelector(".player2-board-btn");
+let resetBtn = document.querySelector(".reset-btn");
+
 let enemyBoard = document.querySelector(".enemy-board");
 const cellSize = 40;
 const gridSize = 10;
@@ -25,18 +30,49 @@ const shipSizes = [5, 4, 3, 2, 1];
 
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 const occupiedCells = new Set();
-const playerBoard = new Gameboard(gridSize); // Gameboard logic instance
 let previousShip = null;
+let oponentSettingBoard = false;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
-    const board = document.getElementById("main-grid");
-    createGrid(board);
-    createGrid(enemyBoard);
-    const ships = createShips(shipSizes);
-    enableDragAndDrop(ships, board);
+    togglePlayers("block", "none");
 });
 
+function openPlayer1Board() {
+    const board = player1BoardCont.querySelector("#main-grid");
+    createGrid(board);
+    createGrid(enemyBoard);
+
+    const playerBoard = new Gameboard(gridSize);
+    const ships = createShips(shipSizes, player1BoardCont);
+    enableDragAndDrop(ships, board, playerBoard);
+    console.log(board);
+}
+openPlayer1Board();
+function openPlayer2Board() {
+    const board = document.querySelector(".player2-grid");
+
+    player2BoardBtn.classList.add("stsrt-game-btn");
+    createGrid(board);
+    createGrid(enemyBoard);
+    const playerBoard = new Gameboard(gridSize);
+    const ships = createShips(shipSizes, player2Cont);
+    enableDragAndDrop(ships, board, playerBoard);
+    oponentSettingBoard = true;
+}
+openPlayer2Board();
+let togglePlayers = (display1, display2) => {
+    player1BoardCont.style.display = display1;
+    player2BoardCont.style.display = display2;
+};
+
+player2BoardBtn.addEventListener("click", () => {
+    togglePlayers("none", "block");
+    boardHeading[1].innerHTML = `Hello ${players.player2}! Place Your Ships`;
+});
+resetBtn.addEventListener("click", () => {
+    togglePlayers("block", "none");
+});
 function createGrid(board) {
     for (let r = 0; r < gridSize; r++) {
         for (let c = 0; c < gridSize; c++) {
@@ -49,7 +85,8 @@ function createGrid(board) {
     }
 }
 
-function createShips(sizes) {
+function createShips(sizes, cont) {
+    let container = cont;
     return sizes.map((size, index) => {
         const ship = document.createElement("div");
         ship.className = "ship";
@@ -58,7 +95,7 @@ function createShips(sizes) {
         ship.style.width = `${cellSize * size}px`;
         ship.style.top = `${480 + index * 50}px`;
         ship.style.left = `50% -200px`;
-        userGameboard.appendChild(ship);
+        container.appendChild(ship);
         ship.dataset.shipName = shipNames[index];
         // Set names
         if (size === 4) {
@@ -84,7 +121,7 @@ function createShips(sizes) {
     });
 }
 
-function enableDragAndDrop(ships, board) {
+function enableDragAndDrop(ships, board, playerBoard) {
     ships.forEach((ship) => {
         let offsetX = 0,
             offsetY = 0;
@@ -261,12 +298,16 @@ function startGame() {
             errorMsg.innerHTML = "Enter different names";
         } else {
             dialog.close();
-            player2GameboardBtn.innerHTML = `${players.player2} board`;
-            boardHeading.innerHTML = `Hello ${players.player1}! Place Your Ships`;
+            if (players.player2 !== "AI") {
+                player2BoardBtn.innerHTML = `${players.player2} board`;
+            } else {
+                player2BoardBtn.classList.add("done-btn");
+            }
+            boardHeading[0].innerHTML = `Hello ${players.player1}! Place Your Ships`;
         }
     }
 }
-startGameBtn.addEventListener("click", startGame);
+doneBtn.addEventListener("click", startGame);
 let stratGameByEnterKey = (e) => {
     if (e.key === "Enter") startGame();
 };
