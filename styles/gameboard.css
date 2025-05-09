@@ -3,14 +3,24 @@
     initial-value: 0deg;
     inherits: false;
 }
+h2 {
+    text-align: center;
+}
 body {
     margin: 20px;
     font-family: sans-serif;
     display: grid;
     place-items: center;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
-
+button {
+    padding: 0.5rem 1rem;
+    margin-top: 0rem;
+    border: none;
+    color: var(--white);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
 .gameboard {
     width: 464px;
     height: 100vh;
@@ -43,9 +53,7 @@ body {
     cursor: grab;
     user-select: none;
     border: 2px solid var(--teal-blue);
-    p {
-        opacity: 0.5;
-    }
+    opacity: 0.6;
 }
 .error {
     position: relative;
@@ -140,13 +148,30 @@ body {
             }
         }
         .start-game-btn {
-            padding: 0.5rem 1rem;
-            margin-top: 0rem;
             background-color: var(--moderate-green);
-            border: none;
-            color: var(--white);
-            border-radius: 0.5rem;
-            cursor: pointer;
+        }
+    }
+}
+
+/* Btns */
+.btns-cont {
+    display: flex;
+    position: absolute;
+    justify-content: space-evenly;
+    bottom: 8px;
+    left: 0;
+
+    width: 100%;
+
+    button {
+        &:first-child {
+            background-color: var(--red);
+        }
+        &:nth-child(2) {
+            background-color: var(--teal-blue);
+        }
+        &:last-child {
+            background-color: var(--moderate-green);
         }
     }
 }
