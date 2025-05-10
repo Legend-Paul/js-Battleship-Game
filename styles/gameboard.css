@@ -67,9 +67,10 @@ button {
 }
 .error {
     position: relative;
+    text-align: center;
     top: -3rem;
-    left: 0;
-
+    left: 50%;
+    transform: translateX(-50%);
     color: var(--red);
 }
 
@@ -184,6 +185,10 @@ button {
             background-color: var(--moderate-green);
         }
     }
+}
+
+.rotate-vertical {
+    transform: rotate(-90deg);
 }
 
 @keyframes spinningBorder {

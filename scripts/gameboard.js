@@ -10,9 +10,9 @@ export class Gameboard {
         this.occupied = new Set(); // All coordinates occupied by ships
     }
 
-    placeShip(startRow, startCol, length, isHorizontal = true) {
+    placeShip(startRow, startCol, length, horizontal) {
         const positions = [];
-
+        const isHorizontal = horizontal;
         for (let i = 0; i < length; i++) {
             const row = isHorizontal ? startRow : startRow + i;
             const col = isHorizontal ? startCol + i : startCol;
@@ -21,6 +21,8 @@ export class Gameboard {
             if (
                 row >= this.size ||
                 col >= this.size ||
+                row < 0 ||
+                col < 0 ||
                 this.occupied.has(key)
             ) {
                 return false; // Invalid position

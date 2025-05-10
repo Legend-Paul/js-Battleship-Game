@@ -22,15 +22,17 @@ const player2BoardCont = document.querySelector(".player2-board-cont");
 const player1BoardCont = document.querySelector(".player1-board-cont");
 let player2BoardBtn = document.querySelector(".player2-board-btn");
 let resetBtn = document.querySelector(".reset-btn");
-
+let rotateBtn = document.querySelector(".rotate-btn");
 let enemyBoard = document.querySelector(".enemy-board");
+
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
-
+let shipToRotate = null;
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 const occupiedCells = new Set();
 let previousShip = null;
+let rotate = false;
 let oponentSettingBoard = false;
 
 // Entry point
@@ -93,33 +95,60 @@ function createShips(sizes, cont) {
         ship.dataset.size = size;
         ship.dataset.id = `ship-${index}`;
         ship.style.width = `${cellSize * size}px`;
-        ship.style.top = `${480 + index * 50}px`;
-        ship.style.left = `50% -200px`;
+
         container.appendChild(ship);
         ship.dataset.shipName = shipNames[index];
         // Set names
-        if (size === 4) {
-            ship.style.top = `${480 + 0 * 50}px`;
-            ship.style.left = `calc(50% + 40px)`;
-            ship.innerHTML = `<p>Bismarck</p>`;
-        } else if (size === 3) {
-            ship.style.top = `${490 + 1 * 40}px`;
-            ship.innerHTML = `<p>Musashi</p>`;
-        } else if (size === 2) {
-            ship.style.top = `${490 + 1 * 40}px`;
-            ship.style.left = `calc(50% - 40px)`;
-            ship.innerHTML = `<p>Iowa-class</p>`;
-        } else if (size === 1) {
-            ship.style.top = `${490 + 1 * 40}px`;
-            ship.style.left = `calc(50% + 80px)`;
-            ship.innerHTML = `<p>HMS</p>`;
-        } else {
-            ship.innerHTML = `<p>Yamato</p>`;
-        }
-
+        positionShip(ship, size, index);
         return ship;
     });
 }
+
+function positionShip(ship, size, index) {
+    if (size === 4) {
+        ship.style.top = `${480 + 0 * 50}px`;
+        ship.style.left = `calc(50% + 40px)`;
+        ship.innerHTML = `<p>Bismarck</p>`;
+    } else if (size === 3) {
+        ship.style.top = `${490 + 1 * 40}px`;
+        ship.innerHTML = `<p>Musashi</p>`;
+    } else if (size === 2) {
+        ship.style.top = `${490 + 1 * 40}px`;
+        ship.style.left = `calc(50% - 40px)`;
+        ship.innerHTML = `<p>Iowa-class</p>`;
+    } else if (size === 1) {
+        ship.style.top = `${490 + 1 * 40}px`;
+        ship.style.left = `calc(50% + 80px)`;
+        ship.innerHTML = `<p>HMS</p>`;
+    } else {
+        ship.style.top = `${480 + index * 50}px`;
+        ship.style.left = `50% -200px`;
+        ship.innerHTML = `<p>Yamato</p>`;
+    }
+}
+
+function getRotatingShip() {
+    document.addEventListener("click", (e) => {
+        let clickedShip = e.target.closest(".ship");
+        if (clickedShip) {
+            clickedShip.style.borderColor = "#001f3f";
+            if (shipToRotate)
+                if (clickedShip.dataset.d !== shipToRotate.dataset.id)
+                    shipToRotate.style.borderColor = "#0074d9";
+            shipToRotate = clickedShip;
+        }
+    });
+}
+getRotatingShip();
+let rotateShip = () => {
+    let rotated = shipToRotate.className.split(" ").includes("rotate-vertical");
+    rotated
+        ? shipToRotate.classList.remove("rotate-vertical")
+        : shipToRotate.classList.add("rotate-vertical");
+    rotate = true;
+};
+
+rotateBtn.addEventListener("click", rotateShip);
 
 function enableDragAndDrop(ships, board, playerBoard) {
     ships.forEach((ship) => {
@@ -133,6 +162,8 @@ function enableDragAndDrop(ships, board, playerBoard) {
             offsetY = e.offsetY;
             ship.style.cursor = "grabbing";
             errrorMsg.innerHTML = "";
+            console.log(e.offsetY, offsetY);
+
             const onMouseMove = (ev) =>
                 moveShip(ship, ev.clientX - offsetX, ev.clientY - offsetY);
             const onMouseUp = (ev) => {
@@ -172,7 +203,7 @@ function enableDragAndDrop(ships, board, playerBoard) {
                     col,
                     parseInt(ship.dataset.size),
 
-                    true
+                    !rotate
                 );
                 if (!placed) {
                     errrorMsg.innerHTML = "Invalid placement on Gameboard!";
@@ -192,6 +223,7 @@ function enableDragAndDrop(ships, board, playerBoard) {
             document.addEventListener("mousemove", onMouseMove);
             document.addEventListener("mouseup", onMouseUp);
             previousShip = e.target;
+            rotate = false;
         });
     });
 }
