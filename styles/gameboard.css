@@ -3,7 +3,9 @@
     initial-value: 0deg;
     inherits: false;
 }
-h2 {
+h2,
+.player1-board-title,
+.player2-board-title {
     text-align: center;
 }
 body {
@@ -178,12 +180,19 @@ button {
         &:first-child {
             background-color: var(--red);
         }
-        &:nth-child(2) {
+
+        &:nth-child(2),
+        &:nth-child(3) {
             background-color: var(--teal-blue);
         }
+        &:nth-child(4),
         &:last-child {
             background-color: var(--moderate-green);
         }
+    }
+    .player1-board-btn,
+    .player2-board-btn {
+        display: none;
     }
 }
 

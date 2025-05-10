@@ -21,15 +21,18 @@ let boardHeading = document.querySelectorAll(".board-heading");
 const player2BoardCont = document.querySelector(".player2-board-cont");
 const player1BoardCont = document.querySelector(".player1-board-cont");
 let player2BoardBtn = document.querySelector(".player2-board-btn");
+let player1BoardBtn = document.querySelector(".player1-board-btn");
+let startGameBtn = document.querySelector(".start-game-btn");
 let resetBtn = document.querySelector(".reset-btn");
 let randomBtn = document.querySelector(".random-btn");
 let enemyBoard = document.querySelector(".enemy-board");
 let currentGameboard = null;
+let player1Gameboard = null;
+let player2Gameboard = null;
 
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
-let shipToRotate = null;
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 let occupiedCells = new Set();
 let previousShip = null;
@@ -37,7 +40,7 @@ let oponentSettingBoard = false;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
-    togglePlayers("block", "none");
+    toggleElemetsDisplay(player2BoardCont, "none", player1BoardCont, "block");
 });
 
 function openPlayer1Board() {
@@ -45,35 +48,35 @@ function openPlayer1Board() {
     createGrid(board);
     createGrid(enemyBoard);
 
-    const playerBoard = new Gameboard(gridSize);
+    player1Gameboard = new Gameboard(gridSize);
     const ships = createShips(shipSizes, player1BoardCont);
-    enableDragAndDrop(ships, board, playerBoard);
-    currentGameboard = playerBoard;
+    enableDragAndDrop(ships, board, player1Gameboard);
 }
 openPlayer1Board();
 function openPlayer2Board() {
     const board = document.querySelector(".player2-grid");
 
-    player2BoardBtn.classList.add("stsrt-game-btn");
+    player2BoardBtn.classList.add("start-game-btn");
     createGrid(board);
-    createGrid(enemyBoard);
-    const playerBoard = new Gameboard(gridSize);
+    // createGrid(enemyBoard);
+    player2Gameboard = new Gameboard(gridSize);
     const ships = createShips(shipSizes, player2Cont);
-    enableDragAndDrop(ships, board, playerBoard);
+    enableDragAndDrop(ships, board, player2Gameboard);
     oponentSettingBoard = true;
 }
+
 openPlayer2Board();
-let togglePlayers = (display1, display2) => {
-    player1BoardCont.style.display = display1;
-    player2BoardCont.style.display = display2;
-};
+function toggleElemetsDisplay(item1, display1, item2, display2) {
+    item1.style.display = display1;
+    item2.style.display = display2;
+}
 
 player2BoardBtn.addEventListener("click", () => {
-    togglePlayers("none", "block");
+    toggleElemetsDisplay(player1BoardCont, "none", player2BoardCont, "block");
     boardHeading[1].innerHTML = `Hello ${players.player2}! Place Your Ships`;
 });
 resetBtn.addEventListener("click", () => {
-    togglePlayers("block", "none");
+    toggleElemetsDisplay(player2BoardCont, "none", player1BoardCont, "block");
 });
 function createGrid(board) {
     for (let r = 0; r < gridSize; r++) {
@@ -291,7 +294,7 @@ function getPlayers() {
 }
 getPlayers();
 
-function startGame() {
+function createPlayers() {
     if (!firstPlayer.value || (twoPlayers && !secondPlayer.value)) {
         if (playOption === "2 players") {
             errorMsg.innerHTML = "Provide all players name";
@@ -310,17 +313,23 @@ function startGame() {
         } else {
             dialog.close();
             if (players.player2 !== "AI") {
+                toggleElemetsDisplay(
+                    startGameBtn,
+                    "none",
+                    player2BoardBtn,
+                    "block"
+                );
                 player2BoardBtn.innerHTML = `${players.player2} board`;
             } else {
-                player2BoardBtn.classList.add("done-btn");
+                player2BoardBtn.classList.add("satrt-game-btn");
             }
             boardHeading[0].innerHTML = `Hello ${players.player1}! Place Your Ships`;
         }
     }
 }
-doneBtn.addEventListener("click", startGame);
+doneBtn.addEventListener("click", createPlayers);
 let stratGameByEnterKey = (e) => {
-    if (e.key === "Enter") startGame();
+    if (e.key === "Enter") createPlayers();
 };
 document.addEventListener("keyup", stratGameByEnterKey);
 
@@ -378,9 +387,76 @@ function placeShipsRandomly(playerBoard, ships, board) {
         }
     });
 }
+function resetShipPlacement() {
+    const ships = document.querySelectorAll(".ship");
+
+    // Clear occupied cells
+    occupiedCells = new Set();
+    player1Gameboard.occupied = new Set();
+
+    // Reset each ship to its initial position
+    ships.forEach((ship, index) => {
+        const size = parseInt(ship.dataset.size);
+
+        // Reset ship's position based on its size and index
+        positionShip(ship, size, index);
+    });
+
+    console.log("All ships have been reset to their initial positions.");
+}
+resetBtn.addEventListener("click", resetShipPlacement);
 
 randomBtn.addEventListener("click", () => {
     const board = player1BoardCont.querySelector("#main-grid");
     const ships = document.querySelectorAll(".ship");
-    placeShipsRandomly(currentGameboard, ships, board);
+    placeShipsRandomly(player1Gameboard, ships, board);
 });
+
+function startGame() {
+    currentGameboard = player1BoardCont;
+    boardHeading[0].innerHTML = `${players.player1} turn`;
+    let player1BoardTitle = currentGameboard.querySelector(
+        ".player1-board-title"
+    );
+    player1BoardTitle.innerHTML = `${players.player1} board`;
+    let player2BoardTitle = currentGameboard.querySelector(
+        ".player2-board-title"
+    );
+    player2BoardTitle.innerHTML = `${players.player2} board`;
+    if (player1Gameboard.ships.length >= 5) {
+        let enemyBoard = currentGameboard.querySelectorAll(".enemy-board");
+        toggleElemetsDisplay(enemyBoard[0], "grid", startGameBtn, "grid");
+        toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
+        startGameBtn.style.display = "none";
+        updateShipPos();
+        if (players.player2 === "AI") {
+        }
+    } else {
+        errrorMsg.innerHTML = "Place all the the ships";
+    }
+}
+startGameBtn.addEventListener("click", startGame);
+
+function updateShipPos() {
+    const ships = currentGameboard.querySelectorAll(".ship");
+    ships.forEach((ship, i) => {
+        if (i <= 4) {
+            ship.style.right += "464px";
+            let occupiedCells = JSON.parse(ship.dataset.occupied);
+            colorOccupiedCells(occupiedCells);
+            ship.style.display = "none";
+        }
+    });
+}
+
+function colorOccupiedCells(occupiedCells) {
+    const board = player1BoardCont.querySelector("#main-grid");
+    let cells = board.querySelectorAll(".cell");
+    cells.forEach((cell) => {
+        let coordinates = cell.dataset.row + "," + cell.dataset.col;
+        if (occupiedCells.includes(coordinates)) {
+            cell.style.backgroundColor = "#7fdbff";
+            cell.style.borderColor = "#0074d9";
+        }
+    });
+}
