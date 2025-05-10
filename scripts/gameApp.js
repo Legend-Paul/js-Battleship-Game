@@ -22,17 +22,17 @@ const player2BoardCont = document.querySelector(".player2-board-cont");
 const player1BoardCont = document.querySelector(".player1-board-cont");
 let player2BoardBtn = document.querySelector(".player2-board-btn");
 let resetBtn = document.querySelector(".reset-btn");
-let rotateBtn = document.querySelector(".rotate-btn");
+let randomBtn = document.querySelector(".random-btn");
 let enemyBoard = document.querySelector(".enemy-board");
+let currentGameboard = null;
 
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
 let shipToRotate = null;
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
-const occupiedCells = new Set();
+let occupiedCells = new Set();
 let previousShip = null;
-let rotate = false;
 let oponentSettingBoard = false;
 
 // Entry point
@@ -48,7 +48,7 @@ function openPlayer1Board() {
     const playerBoard = new Gameboard(gridSize);
     const ships = createShips(shipSizes, player1BoardCont);
     enableDragAndDrop(ships, board, playerBoard);
-    console.log(board);
+    currentGameboard = playerBoard;
 }
 openPlayer1Board();
 function openPlayer2Board() {
@@ -127,35 +127,10 @@ function positionShip(ship, size, index) {
     }
 }
 
-function getRotatingShip() {
-    document.addEventListener("click", (e) => {
-        let clickedShip = e.target.closest(".ship");
-        if (clickedShip) {
-            clickedShip.style.borderColor = "#001f3f";
-            if (shipToRotate)
-                if (clickedShip.dataset.d !== shipToRotate.dataset.id)
-                    shipToRotate.style.borderColor = "#0074d9";
-            shipToRotate = clickedShip;
-        }
-    });
-}
-getRotatingShip();
-let rotateShip = () => {
-    let rotated = shipToRotate.className.split(" ").includes("rotate-vertical");
-    rotated
-        ? shipToRotate.classList.remove("rotate-vertical")
-        : shipToRotate.classList.add("rotate-vertical");
-    rotate = true;
-};
-
-rotateBtn.addEventListener("click", rotateShip);
-
 function enableDragAndDrop(ships, board, playerBoard) {
     ships.forEach((ship) => {
         let offsetX = 0,
             offsetY = 0;
-        let lastValidLeft = ship.style.left;
-        let lastValidTop = ship.style.top;
 
         ship.addEventListener("mousedown", (e) => {
             offsetX = e.offsetX;
@@ -185,45 +160,13 @@ function enableDragAndDrop(ships, board, playerBoard) {
                     board,
                     parseInt(ship.dataset.size)
                 );
-
-                if (!snapped) {
-                    resetShipPosition(ship, lastValidLeft, lastValidTop);
-                    return;
-                }
-
-                const { row, col, left, top, keys } = snapped;
-
-                if (checkOverlap(keys)) {
-                    errrorMsg.innerHTML = "Invalid placement on Gameboard!";
-                    resetShipPosition(ship, lastValidLeft, lastValidTop);
-                    return;
-                }
-                const placed = playerBoard.placeShip(
-                    row,
-                    col,
-                    parseInt(ship.dataset.size),
-
-                    !rotate
-                );
-                if (!placed) {
-                    errrorMsg.innerHTML = "Invalid placement on Gameboard!";
-                    resetShipPosition(ship, lastValidLeft, lastValidTop);
-                    return;
-                }
-
-                updateOccupiedCells(ship, keys);
-                moveShip(ship, left, top);
-
-                lastValidLeft = `${left}px`;
-                lastValidTop = `${top}px`;
-
+                checkShipPlacement(snapped, ship, playerBoard);
                 // console.log(`Ship ${ship.dataset.id} placed at:`, keys);
             };
 
             document.addEventListener("mousemove", onMouseMove);
             document.addEventListener("mouseup", onMouseUp);
             previousShip = e.target;
-            rotate = false;
         });
     });
 }
@@ -245,18 +188,14 @@ function snapToGrid(x, y, board, size) {
 
     let col = Math.round(relX / cellSize);
     let row = Math.round(relY / cellSize);
-
     col = Math.min(Math.max(col, 0), gridSize - size);
     row = Math.min(Math.max(row, 0), gridSize - 1);
 
-    if (
-        relX < 0 ||
-        relY < 0 ||
-        col < 0 ||
-        row < 0 ||
-        col + size > gridSize ||
-        row >= gridSize
-    ) {
+    return getPlacementPos(col, row, size, boardRect);
+}
+
+function getPlacementPos(col, row, size, boardRect) {
+    if (col < 0 || row < 0 || col + size > gridSize || row >= gridSize) {
         return null;
     }
 
@@ -272,6 +211,46 @@ function snapToGrid(x, y, board, size) {
         top: boardRect.top + row * cellSize,
         keys,
     };
+}
+
+let getRandomCordinadets = () => {
+    let col = Math.round(Math.random() * 9);
+    let row = Math.round(Math.random() * 9);
+    return { col, row };
+};
+
+function checkShipPlacement(snapped, ship, playerBoard) {
+    let lastValidLeft = ship.style.left;
+    let lastValidTop = ship.style.top;
+    if (!snapped) {
+        resetShipPosition(ship, lastValidLeft, lastValidTop);
+        return false;
+    }
+
+    const { row, col, left, top, keys } = snapped;
+
+    if (checkOverlap(keys)) {
+        // errrorMsg.innerHTML = "Invalid placement on Gameboard!";
+        resetShipPosition(ship, lastValidLeft, lastValidTop);
+        return false;
+    }
+    const placed = playerBoard.placeShip(
+        row,
+        col,
+        parseInt(ship.dataset.size),
+        true
+    );
+    if (!placed) {
+        // errrorMsg.innerHTML = "Invalid placement on Gameboard!";
+        resetShipPosition(ship, lastValidLeft, lastValidTop);
+        return false;
+    }
+
+    updateOccupiedCells(ship, keys);
+    moveShip(ship, left, top);
+
+    lastValidLeft = `${left}px`;
+    lastValidTop = `${top}px`;
 }
 
 function checkOverlap(keys) {
@@ -353,3 +332,55 @@ function removeRedOutline() {
     });
 }
 removeRedOutline();
+
+function placeShipsRandomly(playerBoard, ships, board) {
+    const boardRect = board.getBoundingClientRect();
+
+    // Clear previously occupied cells
+    occupiedCells = new Set();
+    playerBoard.occupied = new Set();
+
+    ships.forEach((ship) => {
+        let placed = false;
+
+        while (!placed) {
+            // Generate random coordinates
+            const { col, row } = getRandomCordinadets();
+
+            // Randomly decide orientation (horizontal or vertical)
+            const horizontal = Math.random() > 0.5;
+
+            // Get placement position
+            const snapped = getPlacementPos(
+                col,
+                row,
+                parseInt(ship.dataset.size),
+                boardRect,
+                horizontal
+            );
+
+            if (snapped && !checkOverlap(snapped.keys)) {
+                const { left, top, keys } = snapped;
+
+                const placedSuccessfully = playerBoard.placeShip(
+                    row,
+                    col,
+                    parseInt(ship.dataset.size),
+                    horizontal
+                );
+
+                if (placedSuccessfully) {
+                    updateOccupiedCells(ship, keys);
+                    moveShip(ship, left, top);
+                    placed = true;
+                }
+            }
+        }
+    });
+}
+
+randomBtn.addEventListener("click", () => {
+    const board = player1BoardCont.querySelector("#main-grid");
+    const ships = document.querySelectorAll(".ship");
+    placeShipsRandomly(currentGameboard, ships, board);
+});

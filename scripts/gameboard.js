@@ -9,7 +9,11 @@ export class Gameboard {
         this.misses = new Set(); // Missed shots
         this.occupied = new Set(); // All coordinates occupied by ships
     }
-
+    randomPlacement(startRow, startCol, length, horizontal) {
+        let placement = this.placeShip(startRow, startCol, length, horizontal);
+        if (placement) return true;
+        this.randomPlacement(startRow, startCol, length, horizontal);
+    }
     placeShip(startRow, startCol, length, horizontal) {
         const positions = [];
         const isHorizontal = horizontal;
