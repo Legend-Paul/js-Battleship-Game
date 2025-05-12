@@ -16,27 +16,28 @@ let twoPlayers = false;
 
 const player1Cont = document.querySelector(".player1-board-cont .gameboard");
 const player2Cont = document.querySelector(".player2-board-cont .gameboard");
-let errrorMsg = document.querySelector(".error");
+let placementErrorMsg = document.querySelector(".error");
 let boardHeading = document.querySelectorAll(".board-heading");
 const player2BoardCont = document.querySelector(".player2-board-cont");
 const player1BoardCont = document.querySelector(".player1-board-cont");
-let player2BoardBtn = document.querySelector(".player2-board-btn");
+let playersBoardBtn = document.querySelector(".player2-board-btn");
 let player1BoardBtn = document.querySelector(".player1-board-btn");
 let startGameBtn = document.querySelector(".start-game-btn");
 let resetBtn = document.querySelector(".reset-btn");
 let randomBtn = document.querySelector(".random-btn");
-let enemyBoard = document.querySelector(".enemy-board");
+let enemyBoards = document.querySelectorAll(".enemy-board");
+let currentGameboardCont = player1BoardCont;
 let currentGameboard = null;
 let player1Gameboard = null;
 let player2Gameboard = null;
-
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 let occupiedCells = new Set();
 let previousShip = null;
-let oponentSettingBoard = false;
+let player1Turn = true;
+let planning = true;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -46,23 +47,24 @@ window.addEventListener("DOMContentLoaded", () => {
 function openPlayer1Board() {
     const board = player1BoardCont.querySelector("#main-grid");
     createGrid(board);
-    createGrid(enemyBoard);
+    createGrid(enemyBoards[0]);
 
     player1Gameboard = new Gameboard(gridSize);
+    currentGameboard = player1Gameboard;
     const ships = createShips(shipSizes, player1BoardCont);
     enableDragAndDrop(ships, board, player1Gameboard);
 }
 openPlayer1Board();
 function openPlayer2Board() {
-    const board = document.querySelector(".player2-grid");
+    const board = player2BoardCont.querySelector("#main-grid");
 
-    player2BoardBtn.classList.add("start-game-btn");
+    playersBoardBtn.classList.add("start-game-btn");
     createGrid(board);
-    // createGrid(enemyBoard);
+    createGrid(enemyBoards[1]);
+
     player2Gameboard = new Gameboard(gridSize);
     const ships = createShips(shipSizes, player2Cont);
     enableDragAndDrop(ships, board, player2Gameboard);
-    oponentSettingBoard = true;
 }
 
 openPlayer2Board();
@@ -71,13 +73,6 @@ function toggleElemetsDisplay(item1, display1, item2, display2) {
     item2.style.display = display2;
 }
 
-player2BoardBtn.addEventListener("click", () => {
-    toggleElemetsDisplay(player1BoardCont, "none", player2BoardCont, "block");
-    boardHeading[1].innerHTML = `Hello ${players.player2}! Place Your Ships`;
-});
-resetBtn.addEventListener("click", () => {
-    toggleElemetsDisplay(player2BoardCont, "none", player1BoardCont, "block");
-});
 function createGrid(board) {
     for (let r = 0; r < gridSize; r++) {
         for (let c = 0; c < gridSize; c++) {
@@ -111,22 +106,26 @@ function positionShip(ship, size, index) {
     if (size === 4) {
         ship.style.top = `${480 + 0 * 50}px`;
         ship.style.left = `calc(50% + 40px)`;
-        ship.innerHTML = `<p>Bismarck</p>`;
+        ship.style.backgroundColor = `#4caf50`;
+        ship.dataset.bgc = `#4caf50`;
     } else if (size === 3) {
         ship.style.top = `${490 + 1 * 40}px`;
-        ship.innerHTML = `<p>Musashi</p>`;
+        ship.style.backgroundColor = `#ff851b`;
+        ship.dataset.bgc = `#ff851b`;
     } else if (size === 2) {
         ship.style.top = `${490 + 1 * 40}px`;
         ship.style.left = `calc(50% - 40px)`;
-        ship.innerHTML = `<p>Iowa-class</p>`;
+        ship.style.backgroundColor = `#0074d9`;
+        ship.dataset.bgc = `#0074d9`;
     } else if (size === 1) {
         ship.style.top = `${490 + 1 * 40}px`;
         ship.style.left = `calc(50% + 80px)`;
-        ship.innerHTML = `<p>HMS</p>`;
+        ship.dataset.bgc = `#ffd700`;
+        ship.style.backgroundColor = `#ffd700`;
     } else {
         ship.style.top = `${480 + index * 50}px`;
         ship.style.left = `50% -200px`;
-        ship.innerHTML = `<p>Yamato</p>`;
+        ship.dataset.bgc = `#7fdbff`;
     }
 }
 
@@ -139,8 +138,7 @@ function enableDragAndDrop(ships, board, playerBoard) {
             offsetX = e.offsetX;
             offsetY = e.offsetY;
             ship.style.cursor = "grabbing";
-            errrorMsg.innerHTML = "";
-            console.log(e.offsetY, offsetY);
+            placementErrorMsg.innerHTML = "";
 
             const onMouseMove = (ev) =>
                 moveShip(ship, ev.clientX - offsetX, ev.clientY - offsetY);
@@ -153,7 +151,6 @@ function enableDragAndDrop(ships, board, playerBoard) {
                         [...playerBoard.occupied].slice(0, length - idx)
                     );
                 }
-                console.log();
                 document.removeEventListener("mousemove", onMouseMove);
                 document.removeEventListener("mouseup", onMouseUp);
 
@@ -164,7 +161,6 @@ function enableDragAndDrop(ships, board, playerBoard) {
                     parseInt(ship.dataset.size)
                 );
                 checkShipPlacement(snapped, ship, playerBoard);
-                // console.log(`Ship ${ship.dataset.id} placed at:`, keys);
             };
 
             document.addEventListener("mousemove", onMouseMove);
@@ -233,7 +229,7 @@ function checkShipPlacement(snapped, ship, playerBoard) {
     const { row, col, left, top, keys } = snapped;
 
     if (checkOverlap(keys)) {
-        // errrorMsg.innerHTML = "Invalid placement on Gameboard!";
+        // placementErrorMsg.innerHTML = "Invalid placement on Gameboard!";
         resetShipPosition(ship, lastValidLeft, lastValidTop);
         return false;
     }
@@ -244,7 +240,7 @@ function checkShipPlacement(snapped, ship, playerBoard) {
         true
     );
     if (!placed) {
-        // errrorMsg.innerHTML = "Invalid placement on Gameboard!";
+        // placementErrorMsg.innerHTML = "Invalid placement on Gameboard!";
         resetShipPosition(ship, lastValidLeft, lastValidTop);
         return false;
     }
@@ -316,12 +312,12 @@ function createPlayers() {
                 toggleElemetsDisplay(
                     startGameBtn,
                     "none",
-                    player2BoardBtn,
+                    playersBoardBtn,
                     "block"
                 );
-                player2BoardBtn.innerHTML = `${players.player2} board`;
+                playersBoardBtn.innerHTML = `Move to ${players.player2} board`;
             } else {
-                player2BoardBtn.classList.add("satrt-game-btn");
+                playersBoardBtn.classList.add("satrt-game-btn");
             }
             boardHeading[0].innerHTML = `Hello ${players.player1}! Place Your Ships`;
         }
@@ -343,12 +339,13 @@ function removeRedOutline() {
 removeRedOutline();
 
 function placeShipsRandomly(playerBoard, ships, board) {
+    placementErrorMsg.innerHTML = "";
     const boardRect = board.getBoundingClientRect();
 
     // Clear previously occupied cells
     occupiedCells = new Set();
     playerBoard.occupied = new Set();
-
+    let i = 0;
     ships.forEach((ship) => {
         let placed = false;
 
@@ -388,11 +385,11 @@ function placeShipsRandomly(playerBoard, ships, board) {
     });
 }
 function resetShipPlacement() {
-    const ships = document.querySelectorAll(".ship");
+    const ships = currentGameboardCont.querySelectorAll(".ship");
 
     // Clear occupied cells
     occupiedCells = new Set();
-    player1Gameboard.occupied = new Set();
+    currentGameboard.occupied = new Set();
 
     // Reset each ship to its initial position
     ships.forEach((ship, index) => {
@@ -401,62 +398,182 @@ function resetShipPlacement() {
         // Reset ship's position based on its size and index
         positionShip(ship, size, index);
     });
-
-    console.log("All ships have been reset to their initial positions.");
 }
-resetBtn.addEventListener("click", resetShipPlacement);
 
 randomBtn.addEventListener("click", () => {
-    const board = player1BoardCont.querySelector("#main-grid");
-    const ships = document.querySelectorAll(".ship");
-    placeShipsRandomly(player1Gameboard, ships, board);
+    const board = currentGameboardCont.querySelector("#main-grid");
+    const ships = currentGameboardCont.querySelectorAll(".ship");
+    placeShipsRandomly(currentGameboard, ships, board);
 });
+resetBtn.addEventListener("click", resetShipPlacement);
+let moveToPlayer2PlaningBoard = () => {
+    if (currentGameboard.ships.length >= 5) {
+        // playersBoardBtn.removeEventListener("click", changePlayingPlayer);
+        currentGameboard = player2Gameboard;
+        currentGameboardCont = player2BoardCont;
+        toggleElemetsDisplay(
+            player1BoardCont,
+            "none",
+            player2BoardCont,
+            "block"
+        );
+        toggleElemetsDisplay(
+            startGameBtn,
+            "inline-block",
+            playersBoardBtn,
+            "none"
+        );
+        boardHeading[1].innerHTML = `Hello ${players.player2}! Place Your Ships`;
+        playersBoardBtn.addEventListener("click", changePlayingPlayer);
+        currentGameboardCont = player2BoardCont;
+    } else {
+        placementErrorMsg.innerHTML = "Place all the the ships";
+    }
+};
+playersBoardBtn.addEventListener("click", moveToPlayer2PlaningBoard);
 
-function startGame() {
-    currentGameboard = player1BoardCont;
-    boardHeading[0].innerHTML = `${players.player1} turn`;
-    let player1BoardTitle = currentGameboard.querySelector(
+function navigatePlayersBoard() {
+    let player1BoardTitle = currentGameboardCont.querySelector(
         ".player1-board-title"
     );
-    player1BoardTitle.innerHTML = `${players.player1} board`;
-    let player2BoardTitle = currentGameboard.querySelector(
+    let player2BoardTitle = currentGameboardCont.querySelector(
         ".player2-board-title"
     );
+    boardHeading[0].innerHTML = `${players.player1} turn`;
+    player1BoardTitle.innerHTML = `${players.player1} board`;
     player2BoardTitle.innerHTML = `${players.player2} board`;
-    if (player1Gameboard.ships.length >= 5) {
-        let enemyBoard = currentGameboard.querySelectorAll(".enemy-board");
-        toggleElemetsDisplay(enemyBoard[0], "grid", startGameBtn, "grid");
-        toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
-        startGameBtn.style.display = "none";
-        updateShipPos();
-        if (players.player2 === "AI") {
-        }
+
+    let enemyBoard = currentGameboardCont.querySelectorAll(".enemy-board");
+
+    updateShipPos();
+}
+
+let changePlayingPlayer = () => {
+    if (player1Turn) {
+        getPlayerPlaying(
+            player2BoardCont,
+            player1BoardCont,
+            [players.player1, players.player2],
+            player2Gameboard
+        );
     } else {
-        errrorMsg.innerHTML = "Place all the the ships";
+        getPlayerPlaying(
+            player1BoardCont,
+            player2BoardCont,
+            [players.player2, players.player1],
+            player1Gameboard
+        );
+    }
+};
+
+function getPlayerPlaying(
+    openBoardCont,
+    closeBoardCont,
+    boardsName,
+    gameboard
+) {
+    currentGameboardCont = openBoardCont;
+    currentGameboard = gameboard;
+    let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
+    let boardHeading = currentGameboardCont.querySelector(".board-heading");
+    let [player1, player2] = boardsName;
+    let player1BoardTitle = currentGameboardCont.querySelector(
+        ".player1-board-title"
+    );
+    let player2BoardTitle = currentGameboardCont.querySelector(
+        ".player2-board-title"
+    );
+    toggleElemetsDisplay(currentGameboardCont, "block", closeBoardCont, "none");
+    toggleElemetsDisplay(enemyBoard, "grid", closeBoardCont, "none");
+    updateShipPos();
+    playersBoardBtn.innerHTML = `Move to ${player1} board`;
+
+    boardHeading.innerHTML = `${player2} turn`;
+    player1BoardTitle.innerHTML = `${player2} board`;
+    player2BoardTitle.innerHTML = `${player1} board`;
+    player1Turn = !player1Turn;
+}
+function startGame() {
+    if (currentGameboard.ships.length >= 5) {
+        currentGameboardCont = player1BoardCont;
+        if (players.player2 !== "AI") {
+            toggleElemetsDisplay(
+                startGameBtn,
+                "none",
+                playersBoardBtn,
+                "inline-block"
+            );
+            playersBoardBtn.removeEventListener(
+                "click",
+                moveToPlayer2PlaningBoard
+            );
+        }
+        toggleElemetsDisplay(enemyBoards[0], "grid", player2BoardCont, "none");
+        navigatePlayersBoard();
+        toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
+        toggleElemetsDisplay(startGameBtn, "none", player1BoardCont, "block");
+
+        playersBoardBtn.addEventListener("click", changePlayingPlayer);
+    } else {
+        let error = currentGameboardCont.querySelector(".error");
+        error.innerHTML = "Place all the the ships";
     }
 }
+
 startGameBtn.addEventListener("click", startGame);
 
 function updateShipPos() {
-    const ships = currentGameboard.querySelectorAll(".ship");
+    const ships = currentGameboardCont.querySelectorAll(".ship");
     ships.forEach((ship, i) => {
-        if (i <= 4) {
-            ship.style.right += "464px";
-            let occupiedCells = JSON.parse(ship.dataset.occupied);
-            colorOccupiedCells(occupiedCells);
-            ship.style.display = "none";
-        }
+        let occupiedCells = JSON.parse(ship.dataset.occupied);
+        console.log(ship.dataset.occupied);
+        colorOccupiedCells(occupiedCells, ship.dataset.bgc);
+        ship.style.display = "none";
     });
 }
 
-function colorOccupiedCells(occupiedCells) {
-    const board = player1BoardCont.querySelector("#main-grid");
+function colorOccupiedCells(occupiedCells, bgc) {
+    const board = currentGameboardCont.querySelector("#main-grid");
     let cells = board.querySelectorAll(".cell");
     cells.forEach((cell) => {
         let coordinates = cell.dataset.row + "," + cell.dataset.col;
         if (occupiedCells.includes(coordinates)) {
-            cell.style.backgroundColor = "#7fdbff";
-            cell.style.borderColor = "#0074d9";
+            cell.style.backgroundColor = `${bgc}`;
+            cell.style.opacity = ".75";
+            cell.style.borderColor = "var(--navy-blue)";
         }
     });
 }
+
+let getClickedCell = (e) => {
+    let clickedCell = e.target.closest(".cell");
+    let playerBoard = currentGameboardCont.querySelector("#main-grid");
+
+    if (clickedCell) {
+        let ships = playerBoard.querySelector(".ship");
+        checkClickedCell(clickedCell);
+    }
+};
+
+function checkClickedCell(clickedCell) {
+    const row = clickedCell.dataset.row;
+    const col = clickedCell.dataset.col;
+    let coordinates = row + "," + col;
+
+    let circle = document.createElement("div");
+    circle.classList.add("circle");
+    clickedCell.appendChild(circle);
+    let ships = currentGameboard.ships;
+    let board = currentGameboard.receiveAttack(row, col);
+    switch (board.isHit) {
+        case true:
+            circle.style.backgroundColor = "var(--red)";
+            break;
+        case false:
+            circle.style.backgroundColor = "var(--slate-grey)";
+            break;
+    }
+}
+
+let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
+enemyBoard.addEventListener("click", getClickedCell);

@@ -30,9 +30,9 @@ export class Gameboard {
                 this.occupied.has(key)
             ) {
                 return false; // Invalid position
+            } else {
+                positions.push(key);
             }
-
-            positions.push(key);
         }
 
         const ship = new Ship(length);
@@ -43,6 +43,7 @@ export class Gameboard {
     }
 
     receiveAttack(row, col) {
+        console.log(row, col);
         const key = `${row},${col}`;
         if (this.attacks.has(key)) {
             return { valid: false, alreadyAttacked: true };
@@ -50,7 +51,8 @@ export class Gameboard {
 
         this.attacks.add(key);
 
-        for (const ship of this.ships) {
+        for (const ship of this.ships.slice(-5)) {
+            console.log(ship.positions);
             if (ship.isHit(key)) {
                 this.isHits.add(key);
                 return { valid: true, isHit: true, sunk: ship.isSunk() };
