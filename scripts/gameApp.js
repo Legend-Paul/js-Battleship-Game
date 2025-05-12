@@ -27,9 +27,11 @@ let resetBtn = document.querySelector(".reset-btn");
 let randomBtn = document.querySelector(".random-btn");
 let enemyBoards = document.querySelectorAll(".enemy-board");
 let currentGameboardCont = player1BoardCont;
-let currentGameboard = null;
+let enemyGameboardCont = player2BoardCont;
 let player1Gameboard = null;
 let player2Gameboard = null;
+let currentGameboard = player1Gameboard;
+
 const cellSize = 40;
 const gridSize = 10;
 const shipSizes = [5, 4, 3, 2, 1];
@@ -38,7 +40,7 @@ let occupiedCells = new Set();
 let previousShip = null;
 let player1Turn = true;
 let planning = true;
-let enemyGamebaord = null;
+let enemyGamebaord = player2Gameboard;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -407,11 +409,20 @@ randomBtn.addEventListener("click", () => {
     placeShipsRandomly(currentGameboard, ships, board);
 });
 resetBtn.addEventListener("click", resetShipPlacement);
+
+function createAiBoard() {
+    if (players.player2 === "AI") {
+        const board = player2BoardCont.querySelector("#main-grid");
+        const ships = player2BoardCont.querySelectorAll(".ship");
+        placeShipsRandomly(player2Gameboard, ships, board);
+    }
+}
+
 let moveToPlayer2PlaningBoard = () => {
     if (currentGameboard.ships.length >= 5) {
         // playersBoardBtn.removeEventListener("click", changePlayingPlayer);
         currentGameboard = player2Gameboard;
-        currentGameboardCont = player2BoardCont;
+        // player2BoardCont = player2BoardCont;
         toggleElemetsDisplay(
             player1BoardCont,
             "none",
@@ -458,6 +469,7 @@ let changePlayingPlayer = () => {
             player2Gameboard
         );
         enemyGamebaord = player1Gameboard;
+        enemyGameboardCont = player1BoardCont;
     } else {
         getPlayerPlaying(
             player1BoardCont,
@@ -466,6 +478,7 @@ let changePlayingPlayer = () => {
             player1Gameboard
         );
         enemyGamebaord = player2Gameboard;
+        enemyGameboardCont = player2BoardCont;
     }
 };
 
@@ -512,11 +525,14 @@ function startGame() {
                 "click",
                 moveToPlayer2PlaningBoard
             );
+        } else {
+            createAiBoard();
         }
         toggleElemetsDisplay(enemyBoards[0], "grid", player2BoardCont, "none");
         navigatePlayersBoard();
         toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
         toggleElemetsDisplay(startGameBtn, "none", player1BoardCont, "block");
+
         enemyGamebaord = player2Gameboard;
         enemyBoard.addEventListener("click", getClickedCell);
         playersBoardBtn.addEventListener("click", changePlayingPlayer);
@@ -532,7 +548,6 @@ function updateShipPos() {
     const ships = currentGameboardCont.querySelectorAll(".ship");
     ships.forEach((ship, i) => {
         let occupiedCells = JSON.parse(ship.dataset.occupied);
-        console.log(ship.dataset.occupied);
         colorOccupiedCells(occupiedCells, ship.dataset.bgc);
         ship.style.display = "none";
     });
@@ -564,20 +579,23 @@ let getClickedCell = (e) => {
 function checkClickedCell(clickedCell) {
     const row = clickedCell.dataset.row;
     const col = clickedCell.dataset.col;
-    let coordinates = row + "," + col;
 
-    let circle = document.createElement("div");
-    circle.classList.add("circle");
-    clickedCell.appendChild(circle);
-    let ships = enemyGamebaord.ships;
+    displayAttacks(row, col, clickedCell);
+}
+
+function displayAttacks(row, col, clickedCell) {
     let attack = enemyGamebaord.receiveAttack(row, col);
 
     switch (attack.isHit) {
         case true:
-            circle.style.backgroundColor = "var(--red)";
+            console.log("Hit");
+            createAttackDisplayCircle(clickedCell, "--red");
+            getAttackedCell(row, col, "--red");
             break;
         case false:
-            circle.style.backgroundColor = "var(--slate-grey)";
+            console.log("miss");
+            createAttackDisplayCircle(clickedCell, "--slate-grey");
+            getAttackedCell(row, col, "--slate-grey");
             break;
     }
     switch (attack.sunk) {
@@ -585,7 +603,7 @@ function checkClickedCell(clickedCell) {
             circle.style.opacity = "1";
             break;
     }
-    console.log(enemyGamebaord.allShipsSunk());
+
     switch (enemyGamebaord.allShipsSunk()) {
         case true:
             switch (player1Turn) {
@@ -600,4 +618,28 @@ function checkClickedCell(clickedCell) {
     }
 }
 
+function createAttackDisplayCircle(cell, cellBgc) {
+    let circle = document.createElement("div");
+    circle.classList.add("circle");
+
+    circle.style.backgroundColor = `var(${cellBgc})`;
+    console.log(cell);
+    return cell.appendChild(circle);
+}
+
+function getAttackedCell(row, col, cellBgc) {
+    let board = enemyGameboardCont.querySelector("#main-grid");
+    let cells = board.querySelectorAll(".cell");
+    cells.forEach((cell) => {
+        let cellRow = cell.dataset.row;
+        let cellCol = cell.dataset.col;
+        if (cellRow === row && cellCol === col) {
+            createAttackDisplayCircle(cell, cellBgc);
+        }
+    });
+}
 let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
+
+function createAiAttack() {
+    let coordinates = getRandomCordinadets();
+}

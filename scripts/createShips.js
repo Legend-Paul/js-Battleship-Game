@@ -7,8 +7,6 @@ export class Ship {
 
     place(positions) {
         this.positions = positions;
-        console.log(this.positions);
-        console.log(this.positions.length);
     }
 
     isHit(position) {

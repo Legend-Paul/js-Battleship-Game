@@ -54,7 +54,6 @@ export class Gameboard {
         this.attacks.add(key);
 
         for (const ship of this.ships) {
-            console.log(ship.positions);
             if (ship.isHit(key)) {
                 this.isHits.add(key);
                 return { valid: true, isHit: true, sunk: ship.isSunk() };
