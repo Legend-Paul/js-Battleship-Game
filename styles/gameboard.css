@@ -89,6 +89,7 @@ button {
     height: 80%;
     margin: auto;
     border-radius: 50%;
+    opacity: 0.7;
 }
 
 /* style dialog */

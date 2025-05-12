@@ -38,6 +38,7 @@ let occupiedCells = new Set();
 let previousShip = null;
 let player1Turn = true;
 let planning = true;
+let enemyGamebaord = null;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -456,6 +457,7 @@ let changePlayingPlayer = () => {
             [players.player1, players.player2],
             player2Gameboard
         );
+        enemyGamebaord = player1Gameboard;
     } else {
         getPlayerPlaying(
             player1BoardCont,
@@ -463,6 +465,7 @@ let changePlayingPlayer = () => {
             [players.player2, players.player1],
             player1Gameboard
         );
+        enemyGamebaord = player2Gameboard;
     }
 };
 
@@ -491,6 +494,8 @@ function getPlayerPlaying(
     boardHeading.innerHTML = `${player2} turn`;
     player1BoardTitle.innerHTML = `${player2} board`;
     player2BoardTitle.innerHTML = `${player1} board`;
+    enemyBoard.addEventListener("click", getClickedCell);
+
     player1Turn = !player1Turn;
 }
 function startGame() {
@@ -512,7 +517,8 @@ function startGame() {
         navigatePlayersBoard();
         toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
         toggleElemetsDisplay(startGameBtn, "none", player1BoardCont, "block");
-
+        enemyGamebaord = player2Gameboard;
+        enemyBoard.addEventListener("click", getClickedCell);
         playersBoardBtn.addEventListener("click", changePlayingPlayer);
     } else {
         let error = currentGameboardCont.querySelector(".error");
@@ -563,9 +569,10 @@ function checkClickedCell(clickedCell) {
     let circle = document.createElement("div");
     circle.classList.add("circle");
     clickedCell.appendChild(circle);
-    let ships = currentGameboard.ships;
-    let board = currentGameboard.receiveAttack(row, col);
-    switch (board.isHit) {
+    let ships = enemyGamebaord.ships;
+    let attack = enemyGamebaord.receiveAttack(row, col);
+
+    switch (attack.isHit) {
         case true:
             circle.style.backgroundColor = "var(--red)";
             break;
@@ -573,7 +580,24 @@ function checkClickedCell(clickedCell) {
             circle.style.backgroundColor = "var(--slate-grey)";
             break;
     }
+    switch (attack.sunk) {
+        case true:
+            circle.style.opacity = "1";
+            break;
+    }
+    console.log(enemyGamebaord.allShipsSunk());
+    switch (enemyGamebaord.allShipsSunk()) {
+        case true:
+            switch (player1Turn) {
+                case true:
+                    alert(`${players.player1} WON!!`);
+                    break;
+                case false:
+                    alert(`${players.player2} WON!!`);
+                    break;
+            }
+            break;
+    }
 }
 
 let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
-enemyBoard.addEventListener("click", getClickedCell);

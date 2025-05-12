@@ -18,8 +18,10 @@ export class Gameboard {
         const positions = [];
         const isHorizontal = horizontal;
         for (let i = 0; i < length; i++) {
-            const row = isHorizontal ? startRow : startRow + i;
-            const col = isHorizontal ? startCol + i : startCol;
+            const row = startRow;
+            const col = startCol + i;
+            // const row = isHorizontal ? startRow : startRow + i;
+            // const col = isHorizontal ? startCol + i : startCol;
             const key = `${row},${col}`;
 
             if (
@@ -39,11 +41,11 @@ export class Gameboard {
         ship.place(positions);
         positions.forEach((pos) => this.occupied.add(pos));
         this.ships.push(ship);
+        this.ships = this.ships.slice(-5);
         return true;
     }
 
     receiveAttack(row, col) {
-        console.log(row, col);
         const key = `${row},${col}`;
         if (this.attacks.has(key)) {
             return { valid: false, alreadyAttacked: true };
@@ -51,7 +53,7 @@ export class Gameboard {
 
         this.attacks.add(key);
 
-        for (const ship of this.ships.slice(-5)) {
+        for (const ship of this.ships) {
             console.log(ship.positions);
             if (ship.isHit(key)) {
                 this.isHits.add(key);
