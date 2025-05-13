@@ -462,21 +462,26 @@ function navigatePlayersBoard() {
 
 let changePlayingPlayer = () => {
     if (player1Turn) {
+        let click = false;
         getPlayerPlaying(
             player2BoardCont,
             player1BoardCont,
             [players.player1, players.player2],
-            player2Gameboard
+            player2Gameboard,
+            click
         );
         enemyGamebaord = player1Gameboard;
         enemyGameboardCont = player1BoardCont;
     } else {
+        let click = false;
         getPlayerPlaying(
             player1BoardCont,
             player2BoardCont,
             [players.player2, players.player1],
-            player1Gameboard
+            player1Gameboard,
+            click
         );
+
         enemyGamebaord = player2Gameboard;
         enemyGameboardCont = player2BoardCont;
     }
@@ -486,7 +491,8 @@ function getPlayerPlaying(
     openBoardCont,
     closeBoardCont,
     boardsName,
-    gameboard
+    gameboard,
+    click
 ) {
     currentGameboardCont = openBoardCont;
     currentGameboard = gameboard;
@@ -525,28 +531,16 @@ function startGame() {
                 "click",
                 moveToPlayer2PlaningBoard
             );
+            enemyBoard.addEventListener("click", getClickedCell);
         } else {
             createAiBoard();
+            enemyBoard.addEventListener("click", changePlayerAndAi);
         }
         toggleElemetsDisplay(enemyBoards[0], "grid", player2BoardCont, "none");
         navigatePlayersBoard();
         toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
         toggleElemetsDisplay(startGameBtn, "none", player1BoardCont, "block");
 
-        enemyBoard.addEventListener("click", (e) => {
-            let clickedCell = e.target.closest(".cell");
-            let playerBoard = currentGameboardCont.querySelector("#main-grid");
-
-            if (clickedCell) {
-                currentGameboard = player1Gameboard;
-                currentGameboardCont = player1BoardCont;
-                enemyGamebaord = player2Gameboard;
-                enemyGameboardCont = player2BoardCont;
-                let ships = playerBoard.querySelector(".ship");
-                checkClickedCell(clickedCell);
-            }
-            createAiAttack();
-        });
         playersBoardBtn.addEventListener("click", changePlayingPlayer);
     } else {
         let error = currentGameboardCont.querySelector(".error");
@@ -555,6 +549,22 @@ function startGame() {
 }
 
 startGameBtn.addEventListener("click", startGame);
+
+let changePlayerAndAi = (e) => {
+    let clickedCell = e.target.closest(".cell");
+    let playerBoard = currentGameboardCont.querySelector("#main-grid");
+
+    if (clickedCell) {
+        currentGameboard = player1Gameboard;
+        currentGameboardCont = player1BoardCont;
+        enemyGamebaord = player2Gameboard;
+        enemyGameboardCont = player2BoardCont;
+        let ships = playerBoard.querySelector(".ship");
+        checkClickedCell(clickedCell);
+    }
+
+    createAiAttack();
+};
 
 function updateShipPos() {
     const ships = currentGameboardCont.querySelectorAll(".ship");
@@ -591,8 +601,9 @@ let getClickedCell = (e) => {
 function checkClickedCell(clickedCell) {
     const row = clickedCell.dataset.row;
     const col = clickedCell.dataset.col;
-
     displayAttacks(row, col, clickedCell);
+    let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
+    enemyBoard.removeEventListener("click", getClickedCell);
 }
 
 function displayAttacks(row, col, clickedCell) {
@@ -636,16 +647,12 @@ function createAttackDisplayCircle(cell, cellBgc) {
 }
 
 function getAttackedCell(row, col, cellBgc) {
-    console.log(enemyGameboardCont);
-    console.log(typeof row, col);
-
     let board = enemyGameboardCont.querySelector("#main-grid");
     let cells = board.querySelectorAll(".cell");
     cells.forEach((cell) => {
         let cellRow = cell.dataset.row;
         let cellCol = cell.dataset.col;
         if (cellRow == row && cellCol == col) {
-            console.log(cell);
             createAttackDisplayCircle(cell, cellBgc);
         }
     });
@@ -659,23 +666,34 @@ function createAiAttack() {
     enemyGameboardCont = player1BoardCont;
     let board = currentGameboardCont.querySelector("#main-grid");
     let cells = board.querySelectorAll(".cell");
-    let coordinates = getRandomCordinadets();
+    let coordinates = checkNewAiCoodinates();
     let allCoordinates = coordinates.row + "," + coordinates.col;
     let cell = cells[0];
-    if (
-        !currentGameboard.occupied.has(allCoordinates) ||
-        !currentGameboard.attacks.has(allCoordinates)
-    ) {
-        cells.forEach((cell) => {
-            if (
-                cell.dataset.row == coordinates.row &&
-                cell.dataset.col == coordinates.col
-            ) {
-                console.log(cell);
-                cell = cell;
-            }
-        });
-        console.log(cell);
-        displayAttacks(coordinates.row, coordinates.col, cell);
+
+    cells.forEach((cell) => {
+        if (
+            cell.dataset.row == coordinates.row &&
+            cell.dataset.col == coordinates.col
+        ) {
+            cell = cell;
+        }
+    });
+    displayAttacks(coordinates.row, coordinates.col, cell);
+}
+
+function checkNewAiCoodinates() {
+    let found = false;
+    let coordinates = null;
+    while (!found) {
+        coordinates = getRandomCordinadets();
+        let allCoordinates = coordinates.row + "," + coordinates.col;
+
+        if (
+            !currentGameboard.occupied.has(allCoordinates) ||
+            !currentGameboard.attacks.has(allCoordinates)
+        ) {
+            found = true;
+        }
     }
+    return coordinates;
 }
