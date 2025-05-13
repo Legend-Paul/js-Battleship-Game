@@ -31,6 +31,7 @@ let enemyGameboardCont = player2BoardCont;
 let player1Gameboard = null;
 let player2Gameboard = null;
 let currentGameboard = player1Gameboard;
+let enemyGamebaord = player2Gameboard;
 
 const cellSize = 40;
 const gridSize = 10;
@@ -40,7 +41,6 @@ let occupiedCells = new Set();
 let previousShip = null;
 let player1Turn = true;
 let planning = true;
-let enemyGamebaord = player2Gameboard;
 
 // Entry point
 window.addEventListener("DOMContentLoaded", () => {
@@ -533,8 +533,20 @@ function startGame() {
         toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
         toggleElemetsDisplay(startGameBtn, "none", player1BoardCont, "block");
 
-        enemyGamebaord = player2Gameboard;
-        enemyBoard.addEventListener("click", getClickedCell);
+        enemyBoard.addEventListener("click", (e) => {
+            let clickedCell = e.target.closest(".cell");
+            let playerBoard = currentGameboardCont.querySelector("#main-grid");
+
+            if (clickedCell) {
+                currentGameboard = player1Gameboard;
+                currentGameboardCont = player1BoardCont;
+                enemyGamebaord = player2Gameboard;
+                enemyGameboardCont = player2BoardCont;
+                let ships = playerBoard.querySelector(".ship");
+                checkClickedCell(clickedCell);
+            }
+            createAiAttack();
+        });
         playersBoardBtn.addEventListener("click", changePlayingPlayer);
     } else {
         let error = currentGameboardCont.querySelector(".error");
@@ -585,22 +597,19 @@ function checkClickedCell(clickedCell) {
 
 function displayAttacks(row, col, clickedCell) {
     let attack = enemyGamebaord.receiveAttack(row, col);
-
     switch (attack.isHit) {
         case true:
-            console.log("Hit");
             createAttackDisplayCircle(clickedCell, "--red");
             getAttackedCell(row, col, "--red");
             break;
         case false:
-            console.log("miss");
             createAttackDisplayCircle(clickedCell, "--slate-grey");
             getAttackedCell(row, col, "--slate-grey");
             break;
     }
     switch (attack.sunk) {
         case true:
-            circle.style.opacity = "1";
+            alert("one sunk");
             break;
     }
 
@@ -623,17 +632,20 @@ function createAttackDisplayCircle(cell, cellBgc) {
     circle.classList.add("circle");
 
     circle.style.backgroundColor = `var(${cellBgc})`;
-    console.log(cell);
     return cell.appendChild(circle);
 }
 
 function getAttackedCell(row, col, cellBgc) {
+    console.log(enemyGameboardCont);
+    console.log(typeof row, col);
+
     let board = enemyGameboardCont.querySelector("#main-grid");
     let cells = board.querySelectorAll(".cell");
     cells.forEach((cell) => {
         let cellRow = cell.dataset.row;
         let cellCol = cell.dataset.col;
-        if (cellRow === row && cellCol === col) {
+        if (cellRow == row && cellCol == col) {
+            console.log(cell);
             createAttackDisplayCircle(cell, cellBgc);
         }
     });
@@ -641,5 +653,29 @@ function getAttackedCell(row, col, cellBgc) {
 let enemyBoard = currentGameboardCont.querySelector(".enemy-board");
 
 function createAiAttack() {
+    currentGameboard = player2Gameboard;
+    currentGameboardCont = player2BoardCont;
+    enemyGamebaord = player1Gameboard;
+    enemyGameboardCont = player1BoardCont;
+    let board = currentGameboardCont.querySelector("#main-grid");
+    let cells = board.querySelectorAll(".cell");
     let coordinates = getRandomCordinadets();
+    let allCoordinates = coordinates.row + "," + coordinates.col;
+    let cell = cells[0];
+    if (
+        !currentGameboard.occupied.has(allCoordinates) ||
+        !currentGameboard.attacks.has(allCoordinates)
+    ) {
+        cells.forEach((cell) => {
+            if (
+                cell.dataset.row == coordinates.row &&
+                cell.dataset.col == coordinates.col
+            ) {
+                console.log(cell);
+                cell = cell;
+            }
+        });
+        console.log(cell);
+        displayAttacks(coordinates.row, coordinates.col, cell);
+    }
 }
