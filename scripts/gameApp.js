@@ -39,7 +39,7 @@ const shipSizes = [5, 4, 3, 2, 1];
 let shipNames = ["Yamato", "Bismarck", "Musashi", "Iowa-clas", "HMS"];
 let occupiedCells = new Set();
 let previousShip = null;
-let player1Turn = true;
+let player1Turn = false;
 let planning = true;
 
 // Entry point
@@ -461,7 +461,7 @@ function navigatePlayersBoard() {
 }
 
 let changePlayingPlayer = () => {
-    if (player1Turn) {
+    if (!player1Turn) {
         let click = false;
         getPlayerPlaying(
             player2BoardCont,
@@ -550,9 +550,19 @@ function startGame() {
 
 startGameBtn.addEventListener("click", startGame);
 
+function waitForAi() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(createAiAttack);
+        }, 1000);
+    });
+}
+
 let changePlayerAndAi = (e) => {
     let clickedCell = e.target.closest(".cell");
     let playerBoard = currentGameboardCont.querySelector("#main-grid");
+    boardHeading[0].innerHTML = `${players.player2} turn`;
+    console.log(boardHeading[0], boardHeading[0].innerHTML);
 
     if (clickedCell) {
         currentGameboard = player1Gameboard;
@@ -560,10 +570,13 @@ let changePlayerAndAi = (e) => {
         enemyGamebaord = player2Gameboard;
         enemyGameboardCont = player2BoardCont;
         let ships = playerBoard.querySelector(".ship");
+        enemyBoard.removeEventListener("click", changePlayerAndAi);
         checkClickedCell(clickedCell);
+        waitForAi().then(() => {
+            createAiAttack();
+            enemyBoard.addEventListener("click", changePlayerAndAi);
+        });
     }
-
-    createAiAttack();
 };
 
 function updateShipPos() {
@@ -679,6 +692,7 @@ function createAiAttack() {
         }
     });
     displayAttacks(coordinates.row, coordinates.col, cell);
+    boardHeading[0].innerHTML = `${players.player1} turn`;
 }
 
 function checkNewAiCoodinates() {
@@ -697,3 +711,19 @@ function checkNewAiCoodinates() {
     }
     return coordinates;
 }
+
+let getHoveredCell = (e) => {
+    let hoveredCell = e.target.closest(".cell");
+    if (hoveredCell) {
+        if (hoveredCell.innerHTML) {
+            hoveredCell.style.cursor = "not-allowed";
+        }
+    }
+};
+
+function changeHoverCursor() {
+    let enemyBoard = document.querySelectorAll(".enemy-board");
+    enemyBoard[0].addEventListener("mouseover", getHoveredCell);
+    enemyBoard[1].addEventListener("mouseover", getHoveredCell);
+}
+changeHoverCursor();
