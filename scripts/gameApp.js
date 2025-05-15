@@ -32,6 +32,7 @@ let player1Gameboard = null;
 let player2Gameboard = null;
 let currentGameboard = player1Gameboard;
 let enemyGamebaord = player2Gameboard;
+let lastClickedShiCell = null;
 
 const cellSize = 40;
 const gridSize = 10;
@@ -595,7 +596,7 @@ function colorOccupiedCells(occupiedCells, bgc) {
         let coordinates = cell.dataset.row + "," + cell.dataset.col;
         if (occupiedCells.includes(coordinates)) {
             cell.style.backgroundColor = `${bgc}`;
-            cell.style.opacity = ".75";
+            cell.style.opacity = ".65";
             cell.style.borderColor = "var(--navy-blue)";
         }
     });
@@ -623,6 +624,7 @@ function displayAttacks(row, col, clickedCell) {
     let attack = enemyGamebaord.receiveAttack(row, col);
     switch (attack.isHit) {
         case true:
+            lastClickedShiCell = clickedCell;
             createAttackDisplayCircle(clickedCell, "--red");
             getAttackedCell(row, col, "--red");
             break;
@@ -633,7 +635,7 @@ function displayAttacks(row, col, clickedCell) {
     }
     switch (attack.sunk) {
         case true:
-            alert("one sunk");
+            colorSunkShip();
             break;
     }
 
@@ -642,6 +644,7 @@ function displayAttacks(row, col, clickedCell) {
             switch (player1Turn) {
                 case true:
                     alert(`${players.player1} WON!!`);
+                    location.reload();
                     break;
                 case false:
                     alert(`${players.player2} WON!!`);
@@ -727,3 +730,31 @@ function changeHoverCursor() {
     enemyBoard[1].addEventListener("mouseover", getHoveredCell);
 }
 changeHoverCursor();
+
+function getShipToColor() {
+    let row = lastClickedShiCell.dataset.row;
+    let col = lastClickedShiCell.dataset.col;
+    let coordinates = row + "," + col;
+
+    let ships = enemyGamebaord.ships;
+    for (let idx = 0; idx < ships.length; idx++) {
+        if (ships[idx].positions.includes(coordinates)) {
+            return ships[idx].positions;
+        }
+    }
+}
+
+function colorSunkShip() {
+    const cells = currentGameboardCont.querySelectorAll(".enemy-board .cell");
+    cells.forEach((cell, i) => {
+        let row = cell.dataset.row;
+        let col = cell.dataset.col;
+        let coordinates = row + "," + col;
+        if (getShipToColor().includes(coordinates)) {
+            setTimeout(() => {
+                let circle = cell.querySelector(".circle");
+                circle.style.opacity = "1";
+            }, 500);
+        }
+    });
+}
