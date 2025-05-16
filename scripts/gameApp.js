@@ -463,24 +463,20 @@ function navigatePlayersBoard() {
 
 let changePlayingPlayer = () => {
     if (!player1Turn) {
-        let click = false;
         getPlayerPlaying(
             player2BoardCont,
             player1BoardCont,
             [players.player1, players.player2],
-            player2Gameboard,
-            click
+            player2Gameboard
         );
         enemyGamebaord = player1Gameboard;
         enemyGameboardCont = player1BoardCont;
     } else {
-        let click = false;
         getPlayerPlaying(
             player1BoardCont,
             player2BoardCont,
             [players.player2, players.player1],
-            player1Gameboard,
-            click
+            player1Gameboard
         );
 
         enemyGamebaord = player2Gameboard;
@@ -492,8 +488,7 @@ function getPlayerPlaying(
     openBoardCont,
     closeBoardCont,
     boardsName,
-    gameboard,
-    click
+    gameboard
 ) {
     currentGameboardCont = openBoardCont;
     currentGameboard = gameboard;
@@ -532,11 +527,15 @@ function startGame() {
                 "click",
                 moveToPlayer2PlaningBoard
             );
+            enemyGamebaord = player2Gameboard;
             enemyBoard.addEventListener("click", getClickedCell);
         } else {
             createAiBoard();
             enemyBoard.addEventListener("click", changePlayerAndAi);
         }
+        player1Cont.style = "justify-content: center;";
+        player2Cont.style = "justify-content: center;";
+        document.body.style = "overflow: scroll;";
         toggleElemetsDisplay(enemyBoards[0], "grid", player2BoardCont, "none");
         navigatePlayersBoard();
         toggleElemetsDisplay(resetBtn, "none", randomBtn, "none");
@@ -565,11 +564,11 @@ let changePlayerAndAi = (e) => {
     boardHeading[0].innerHTML = `${players.player2} turn`;
     console.log(boardHeading[0], boardHeading[0].innerHTML);
 
+    currentGameboard = player1Gameboard;
+    currentGameboardCont = player1BoardCont;
+    enemyGamebaord = player2Gameboard;
+    enemyGameboardCont = player2BoardCont;
     if (clickedCell) {
-        currentGameboard = player1Gameboard;
-        currentGameboardCont = player1BoardCont;
-        enemyGamebaord = player2Gameboard;
-        enemyGameboardCont = player2BoardCont;
         let ships = playerBoard.querySelector(".ship");
         enemyBoard.removeEventListener("click", changePlayerAndAi);
         checkClickedCell(clickedCell);

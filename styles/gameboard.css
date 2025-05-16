@@ -13,7 +13,7 @@ body {
     font-family: sans-serif;
     display: grid;
     place-items: center;
-    /* overflow: hidden; */
+    overflow: hidden;
 }
 button {
     padding: 0.5rem 1rem;
@@ -28,8 +28,9 @@ button {
 }
 .gameboard {
     display: flex;
-    gap: 3rem;
+    flex-wrap: wrap-reverse;
     height: 100vh;
+    gap: 3rem;
     background-color: var(--light-grey);
     padding-left: 2rem;
     padding-top: 1rem;
@@ -222,5 +223,11 @@ button {
     }
     100% {
         --angle: 360deg;
+    }
+}
+
+@media screen and (width < 966px) {
+    .gameboard {
+        height: 180vh;
     }
 }
